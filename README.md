@@ -19,7 +19,7 @@
 4. [6-Stage Reconnaissance Pipeline](#-4-6-stage-reconnaissance-pipeline)
 5. [Quick Start Deployment](#-5-quick-start-deployment)
 6. [Kali Linux Agentless SSH Setup](#-6-kali-linux-agentless-ssh-setup)
-7. [10 Specialized Audit Modules](#-7-10-specialized-audit-modules)
+7. [Specialized Audit Modules](#-7-specialized-audit-modules)
 8. [REST API Documentation](#-8-rest-api-documentation)
 9. [Project Directory Layout](#-9-project-directory-layout)
 10. [Legal & Ethical Disclaimer](#-10-legal--ethical-disclaimer)
@@ -154,7 +154,7 @@ http://localhost:8000
 ### Method 3: Run from Source (For Developers)
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/x1vart-web-recon.git
+git clone https://github.com/x1vart/x1vart-web-recon.git
 cd x1vart-web-recon
 
 # 2. Install dependencies
@@ -179,7 +179,7 @@ sudo systemctl start ssh
 
 *(Recommended)* Ensure standard security CLI tools are installed:
 ```bash
-sudo apt update && sudo apt install -y nmap whatweb nikto ffuf gobuster dnsutils whois subfinder
+sudo apt update && sudo apt install -y nmap whatweb nikto ffuf whois subfinder sslscan wafw00f && sudo systemctl enable --now ssh
 ```
 
 ### Step 2: Connect from x1vart Dashboard
@@ -191,7 +191,7 @@ sudo apt update && sudo apt install -y nmap whatweb nikto ffuf gobuster dnsutils
 
 ---
 
-## 📊 7. 10 Specialized Audit Modules
+## 📊 7. Specialized Audit Modules
 
 ```text
 ├── 1. Overview & Infrastructure Map -> Tech Stack, Subdomain Takeover, HTTP Headers, Reverse IP
@@ -203,7 +203,11 @@ sudo apt update && sudo apt install -y nmap whatweb nikto ffuf gobuster dnsutils
 ├── 7. OWASP API Top 10 Modeler      -> Cyber Threat Radar, 10-risk exposure matrix, remediation guides
 ├── 8. Dual-Node Terminal HUD        -> Live synchronization of Windows dispatch events and Kali CLI executions
 ├── 9. Scan History & Delta Diff     -> SQLite audit trail, instant reload, Delta Diff comparison engine
-└── 10. Continuous EASM & Alerts     -> Automated cron intervals, Discord Webhook Guardian notifications
+├── 10. Continuous EASM & Alerts     -> Automated cron intervals, Discord Webhook Guardian notifications
+├── 11. Strict Scope & Target Guard  -> Domain whitelist/regex enforcement, 3rd-party SaaS & SSRF protection
+├── 12. Dynamic SPA Crawler (Browser)-> Headless Chromium crawler for dynamic JS routing & API calls
+├── 13. Dual-Token BOLA Validator    -> Active cross-tenant authorization & horizontal privilege audit
+└── 14. Session Auth & Burp Bridge   -> Injected Bearer/Custom headers & Burp Suite XML sitemap export
 ```
 
 ---
@@ -215,12 +219,13 @@ sudo apt update && sudo apt install -y nmap whatweb nikto ffuf gobuster dnsutils
 | `POST` | `/api/recon/start` | Initiates asynchronous reconnaissance job in the background; returns `scan_id` |
 | `GET` | `/api/recon/status/{scan_id}` | Real-time progress monitoring (% completed, current stage, logs) |
 | `POST` | `/api/whois/lookup` | On-demand Whois & ASN lookup (Kali CLI + RDAP fallback) |
-| `POST` | `/api/api-tester/send` | Dispatches live HTTP requests and returns response telemetry |
+| `POST` | `/api/tester/send` | Dispatches live HTTP requests and returns response telemetry |
 | `GET` | `/api/report/export` | Generates comprehensive Executive Security Audit Report in HTML / PDF |
 | `GET` | `/api/openapi/download` | Exports auto-generated OpenAPI 3.0 JSON specification |
+| `GET` | `/api/subdomains/export.txt` | Exports discovered subdomains as plain text wordlist |
 | `POST` | `/api/ssh/test` | Verifies remote Kali Linux SSH reachability and tool availability |
 | `POST` | `/api/easm/schedules` | Registers continuous attack surface monitoring schedules |
-| `POST` | `/api/easm/discord/test`| Sends test security alert notification to configured Discord Webhook |
+| `POST` | `/api/easm/test-webhook`| Sends test security alert notification to configured Discord Webhook |
 
 ---
 
@@ -243,8 +248,12 @@ x1vart-web-recon/
 │   ├── sourcemap_hunter.py     # Source Map unpacker & original code tree reconstructor
 │   ├── owasp_analyzer.py       # OWASP API Security Top 10:2023 threat modeling engine
 │   ├── openapi_bridge.py       # Dynamic OpenAPI 3.0 specification generator
-│   ├── report_generator.py     # Executive Security Audit Report generator (HTML/PDF)
-│   └── asset_diff_notifier.py  # Attack surface delta diff engine & Discord Webhook Guardian
+│   ├── report_generator.py     # Executive Security Audit Report generator (HTML/PDF & PoC)
+│   ├── asset_diff_notifier.py  # Attack surface delta diff engine & Discord Webhook Guardian
+│   ├── scope_validator.py      # Scope enforcement & 3rd-party/SSRF target sanitizer
+│   ├── spa_crawler.py          # Playwright dynamic crawler for modern single-page apps
+│   ├── active_bola_validator.py# Dual-token active authorization & BOLA/IDOR validator
+│   └── auth_session_manager.py # Authenticated session manager & Burp Suite XML exporter
 └── static/
     └── index.html              # Cyber Dark Dashboard, Cytoscape Graph & Mini IDE UI
 ```
