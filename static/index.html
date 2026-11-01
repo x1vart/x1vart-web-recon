@@ -7,20 +7,20 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
+                tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         cyber: {
-                            bg: '#090d16',
-                            card: '#0f172a',
-                            border: '#1e293b',
-                            primary: '#06b6d4', // Cyan
-                            accent: '#8b5cf6',  // Purple
-                            success: '#10b981', // Emerald
-                            warning: '#f59e0b', // Amber
-                            danger: '#ef4444'   // Rose
+                            bg: '#0b0f19',
+                            card: '#111827',
+                            border: '#1f293d',
+                            primary: '#38bdf8', // Sky Blue
+                            accent: '#818cf8',  // Indigo
+                            success: '#34d399', // Emerald
+                            warning: '#fbbf24', // Amber
+                            danger: '#f87171'   // Rose
                         }
                     },
                     fontFamily: {
@@ -34,6 +34,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Cytoscape.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <!-- DOMPurify Anti-XSS Sanitation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
+    <script>
+        // Global Anti-XSS Sanitizer & escapeHtml Utility
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&')
+                .replace(/</g, '<')
+                .replace(/>/g, '>')
+                .replace(/"/g, '"')
+                .replace(/'/g, '&#039;');
+        }
+        window.escapeHtml = escapeHtml;
+
+        // Active InnerHTML Protection Shield
+        (function() {
+            const proto = Element.prototype;
+            const originalSet = Object.getOwnPropertyDescriptor(proto, 'innerHTML').set;
+            const originalGet = Object.getOwnPropertyDescriptor(proto, 'innerHTML').get;
+
+            function sanitizePayload(raw) {
+                if (typeof raw !== 'string') return raw;
+                if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+                    return window.DOMPurify.sanitize(raw, {
+                        ADD_TAGS: ['i', 'svg', 'path', 'button', 'span', 'code', 'pre', 'tr', 'td', 'th', 'thead', 'tbody', 'table', 'div', 'a', 'p', 'b', 'strong', 'em'],
+                        ADD_ATTR: ['target', 'onclick', 'data-*', 'colspan', 'rowspan', 'class', 'style', 'id', 'href', 'title']
+                    });
+                }
+                // Native fallback sanitizer if DOMPurify CDN is offline
+                return raw
+                    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+                    .replace(/\bon\w+\s*=\s*(["'])(?:(?!\1).)*\1/gi, function(match) {
+                        if (/copyToClipboard|copyCurl|copyBurpCurl|exportSubdomainsTxt|copyKaliCommand|openApiTester|loadScanDetails|deleteScan|runScheduleNow|deleteSchedule|toggleSchedule|openSshConfigModal|openSshGuideModal|saveSshConfig|testSshFromModal|closeSshConfigModal|closeSshGuideModal|pingKaliAgent|switchTab|downloadReport|exportOpenApi|scrollTo/i.test(match)) {
+                            return match;
+                        }
+                        return '';
+                    })
+                    .replace(/javascript:/gi, 'blocked:');
+            }
+
+            Object.defineProperty(proto, 'innerHTML', {
+                get() {
+                    return originalGet.call(this);
+                },
+                set(value) {
+                    return originalSet.call(this, sanitizePayload(value));
+                }
+            });
+        })();
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -43,6 +95,32 @@
         ::-webkit-scrollbar-track { background: #090d16; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        /* Sidebar and Modern Dark Tabs */
+        .tab-btn {
+            color: #94a3b8;
+            border-left: 3px solid transparent;
+            transition: all 0.15s ease-in-out;
+        }
+        .tab-btn:hover {
+            color: #f1f5f9;
+            background-color: rgba(30, 41, 59, 0.6);
+        }
+        .tab-btn.active {
+            color: #38bdf8 !important;
+            background-color: rgba(56, 189, 248, 0.08) !important;
+            border-left-color: #38bdf8 !important;
+            font-weight: 600;
+        }
+        .tab-btn.active i {
+            color: #38bdf8 !important;
+        }
+        .tab-btn.active span[id^="badge-"] {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
 
         .neon-glow {
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
@@ -152,175 +230,270 @@
         }
     </style>
 </head>
-<body class="bg-cyber-bg text-slate-200 min-h-screen flex flex-col antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+<body class="bg-[#0b0f19] text-slate-200 min-h-screen flex flex-row antialiased selection:bg-sky-500/30 selection:text-sky-200 overflow-hidden">
 
-    <!-- Top Navigation Header -->
-    <header class="border-b border-cyber-border bg-cyber-card/90 backdrop-blur sticky top-0 z-50 px-6 py-3.5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <!-- LEFT SIDEBAR NAVIGATION -->
+    <aside class="w-64 bg-[#0d1322] border-r border-slate-800/80 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40">
+        <!-- Logo & Branding -->
+        <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-lg bg-cyan-950 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold shadow-inner">
-                    <i class="fa-solid fa-shield-halved text-base"></i>
+                <div class="w-8 h-8 rounded-lg bg-sky-950/80 border border-sky-500/40 flex items-center justify-center text-sky-400 font-bold shadow-sm">
+                    <i class="fa-solid fa-shield-halved text-sm"></i>
                 </div>
                 <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-extrabold text-lg tracking-wider text-white">x1vart <span class="text-cyan-400">SURFACE & API AUDIT</span></span>
-                        <span class="text-[10px] bg-cyan-950 text-cyan-300 font-mono px-2 py-0.5 rounded border border-cyan-800">OWASP API TOP 10</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Hệ thống Quản lý Bề mặt Tấn công, Dò tìm Lỗ hổng API & Decompiler JS AST</p>
+                    <div class="font-extrabold text-sm tracking-wider text-white">x1vart <span class="text-sky-400 font-mono text-xs">EASM</span></div>
+                    <div class="text-[10px] text-slate-400 font-mono">OWASP API Audit Suite</div>
                 </div>
             </div>
-
-            <!-- Quick Navigation Actions -->
-            <div class="flex items-center space-x-3">
-                <button onclick="openCommandPalette()" class="text-xs bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 px-3 py-1.5 rounded-lg border border-slate-700 hover:border-cyan-500/50 flex items-center space-x-2 transition shadow-inner">
-                    <i class="fa-solid fa-terminal text-cyan-400"></i>
-                    <span class="hidden sm:inline">Lệnh nhanh</span>
-                    <kbd class="px-1.5 py-0.5 text-[10px] bg-slate-950 rounded border border-slate-700 text-cyan-400 font-mono font-bold">Ctrl K</kbd>
-                </button>
-                <button onclick="openHistoryModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1.5 rounded border border-slate-700 hover:border-cyan-500/40 flex items-center space-x-1.5 transition">
-                    <i class="fa-solid fa-clock-rotate-left text-xs text-cyan-400"></i>
-                    <span>Lịch sử quét</span>
-                </button>
-                <a href="/api/report/export" target="_blank" id="btn-header-report" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-300 px-3 py-1.5 rounded border border-slate-700 hover:border-cyan-500/40 flex items-center space-x-1.5 transition">
-                    <i class="fa-solid fa-file-invoice text-xs text-cyan-400"></i>
-                    <span>Báo cáo Thẩm định</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-6 py-6 w-full flex-1 space-y-6">
-
-        <!-- KALI LINUX AGENTLESS SSH ORCHESTRATION CONTROL PANEL -->
-        <div class="bg-gradient-to-r from-slate-900 via-purple-950/30 to-slate-900 border border-purple-800/50 rounded-xl p-4 shadow-2xl space-y-3">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-purple-950 border border-purple-500/50 flex items-center justify-center text-purple-400 text-lg shadow-inner">
-                        <i class="fa-brands fa-linux"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <span class="font-extrabold text-sm text-white tracking-wide">KALI LINUX RECON NODE</span>
-                            <span class="text-[10px] bg-purple-950 text-purple-300 font-mono px-2 py-0.5 rounded border border-purple-800">AGENTLESS SSH</span>
-                            <span id="kali-status-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 flex items-center space-x-1">
-                                <span class="w-2 h-2 rounded-full bg-slate-500 inline-block"></span>
-                                <span>CHƯA KIỂM TRA</span>
-                            </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Kết nối SSH trực tiếp tới máy ảo Kali Linux (<span id="kali-display-host" class="text-cyan-400 font-mono">Chưa kết nối (Cục bộ)</span>) để thực thi pipeline công cụ CLI thực chiến (Subfinder, Nmap, WhatWeb, Nikto).
-                        </p>
-                    </div>
-                </div>
-
-                <!-- SSH Actions & Buttons -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <input id="kali-worker-url" type="hidden" value="http://127.0.0.1:9000">
-                    <button id="btn-ping-kali" class="px-3 py-1.5 bg-purple-900 hover:bg-purple-800 text-purple-200 text-xs font-semibold rounded-lg border border-purple-600/60 shadow flex items-center space-x-1.5 transition">
-                        <i class="fa-solid fa-satellite-dish"></i>
-                        <span>Kiểm tra SSH</span>
-                    </button>
-                    <button onclick="openSshConfigModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-semibold rounded-lg border border-cyan-800/60 shadow flex items-center space-x-1.5 transition">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Cài đặt SSH</span>
-                    </button>
-                    <button onclick="openSshGuideModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-lg border border-amber-800/60 shadow flex items-center space-x-1.5 transition">
-                        <i class="fa-solid fa-book-open"></i>
-                        <span>Hướng dẫn</span>
-                    </button>
-                    <label class="flex items-center space-x-1.5 text-xs text-purple-300 cursor-pointer bg-purple-950/80 px-2.5 py-1.5 rounded-lg border border-purple-700/60">
-                        <input id="chk-use-kali" type="checkbox" checked class="rounded border-slate-700 text-purple-500 focus:ring-0 bg-slate-900">
-                        <span class="font-semibold">Bật Kali SSH</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Discovered Tools Badges & Quick Command Bar -->
-            <div class="flex flex-wrap items-center justify-between pt-2 border-t border-purple-900/40 text-xs gap-2">
-                <div class="flex items-center space-x-2">
-                    <span class="text-slate-400 font-mono text-[11px]"><i class="fa-solid fa-toolbox mr-1 text-purple-400"></i>Công cụ CLI trên Kali:</span>
-                    <div id="kali-tools-badges" class="flex flex-wrap gap-1.5">
-                        <span class="kali-tool-pill text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-500 border border-slate-700" data-tool="subfinder">subfinder</span>
-                        <span class="kali-tool-pill text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-500 border border-slate-700" data-tool="nmap">nmap</span>
-                        <span class="kali-tool-pill text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-500 border border-slate-700" data-tool="whatweb">whatweb</span>
-                        <span class="kali-tool-pill text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-500 border border-slate-700" data-tool="ffuf">ffuf</span>
-                        <span class="kali-tool-pill text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-500 border border-slate-700" data-tool="nikto">nikto</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <span class="text-[11px] text-slate-400 font-mono">Lệnh duy nhất trên Kali:</span>
-                    <code id="kali-quick-cmd" class="text-[10px] font-mono bg-black/60 px-2 py-1 rounded text-cyan-300 border border-slate-800 select-all cursor-pointer" onclick="copyKaliCommand()" title="Nhấn để sao chép lệnh">sudo systemctl start ssh</code>
-                    <button onclick="copyKaliCommand()" class="text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition" title="Sao chép lệnh">
-                        <i class="fa-regular fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Helpful Callout for Community / New Users -->
-            <div class="bg-slate-950/70 border border-cyan-900/40 rounded-lg px-3 py-2 text-[11px] text-slate-300 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-circle-info text-cyan-400"></i>
-                    <span><strong>Dành cho người dùng mới:</strong> Nếu máy tính chưa cài đặt Kali Linux, bạn vẫn có thể quét trực tiếp! Hệ thống tự động chuyển sang <strong>Windows Local Engine</strong> để kiểm tra Subdomain, JS AST, CVE và OWASP API.</span>
-                </div>
-                <button onclick="openSshGuideModal()" class="text-cyan-400 hover:text-cyan-300 underline font-mono text-[10px] ml-2 shrink-0">Xem hướng dẫn</button>
-            </div>
+            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">v2.2</span>
         </div>
 
-        <!-- Target Recon & Scan Bar -->
-        <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 shadow-2xl space-y-4">
-            <div class="flex flex-col md:flex-row gap-3">
+        <!-- Navigation Menu (Scrollable) -->
+        <div class="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs">
+            <!-- Group 1: BỀ MẶT TẤN CÔNG -->
+            <div>
+                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                    <span>Bề Mặt Tấn Công</span>
+                    <i class="fa-solid fa-globe text-[10px] text-slate-600"></i>
+                </div>
+                <div class="space-y-0.5">
+                    <button class="tab-btn active w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-subdomains">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-network-wired text-sky-400 w-4 text-center"></i>
+                            <span class="truncate">Hạ Tầng & Subdomains</span>
+                        </span>
+                        <span id="badge-sub-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-vulns">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-shield-virus text-rose-400 w-4 text-center"></i>
+                            <span class="truncate">Lỗ Hổng & Cổng Dịch Vụ</span>
+                        </span>
+                        <span id="badge-vuln-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-osint">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-file-shield text-blue-400 w-4 text-center"></i>
+                            <span class="truncate">OSINT & Tài Liệu</span>
+                        </span>
+                        <span id="badge-docs-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Group 2: MÃ NGUỒN & API -->
+            <div>
+                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                    <span>Mã Nguồn & API</span>
+                    <i class="fa-solid fa-code text-[10px] text-slate-600"></i>
+                </div>
+                <div class="space-y-0.5">
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-apis">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-terminal text-emerald-400 w-4 text-center"></i>
+                            <span class="truncate">Điểm Cuối API & BOLA</span>
+                        </span>
+                        <span id="badge-api-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-secrets">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-key text-rose-400 w-4 text-center"></i>
+                            <span class="truncate">Khóa Bí Mật (Secrets)</span>
+                        </span>
+                        <span id="badge-sec-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-sourcemaps">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-folder-tree text-amber-400 w-4 text-center"></i>
+                            <span class="truncate">Source Map Mini IDE</span>
+                        </span>
+                        <span id="badge-maps-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Group 3: MÔ HÌNH ĐE DỌA -->
+            <div>
+                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                    <span>Mô Hình Đe Dọa</span>
+                    <i class="fa-solid fa-chart-pie text-[10px] text-slate-600"></i>
+                </div>
+                <div class="space-y-0.5">
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-owasp">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-bullseye text-sky-400 w-4 text-center"></i>
+                            <span class="truncate">OWASP API Top 10</span>
+                        </span>
+                        <span id="badge-owasp-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Group 4: VẬN HÀNH & LOGS -->
+            <div>
+                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                    <span>Vận Hành & Logs</span>
+                    <i class="fa-solid fa-sliders text-[10px] text-slate-600"></i>
+                </div>
+                <div class="space-y-0.5">
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-kali-terminal">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-terminal text-purple-400 w-4 text-center"></i>
+                            <span class="truncate">Nhật Ký Dual-Node Kali</span>
+                        </span>
+                        <span id="badge-cli-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-history">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-clock-rotate-left text-orange-400 w-4 text-center"></i>
+                            <span class="truncate">Lịch Sử & Delta Diff</span>
+                        </span>
+                        <span id="badge-history-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-easm">
+                        <span class="flex items-center space-x-2.5 truncate">
+                            <i class="fa-solid fa-satellite-dish text-indigo-400 w-4 text-center"></i>
+                            <span class="truncate">Giám Sát EASM & Alert</span>
+                        </span>
+                        <span id="badge-sched-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Kali Node Status Footer -->
+        <div class="p-3 border-t border-slate-800/80 bg-slate-900/60">
+            <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-brands fa-linux text-purple-400 text-sm"></i>
+                    <span class="text-[11px] font-bold text-slate-200">Kali SSH Node</span>
+                </div>
+                <span id="kali-status-badge" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 flex items-center space-x-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500 inline-block"></span>
+                    <span>CHƯA CHECK</span>
+                </span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400 truncate mb-2">
+                <span id="kali-display-host">Chưa kết nối (Cục bộ)</span>
+            </div>
+            <div class="flex items-center space-x-1.5">
+                <button id="btn-ping-kali" class="flex-1 py-1 bg-purple-950/80 hover:bg-purple-900 text-purple-200 text-[10px] font-semibold rounded border border-purple-700/60 transition flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>Test SSH</span>
+                </button>
+                <button onclick="openSshConfigModal()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] rounded border border-slate-700 transition" title="Cài đặt SSH">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <button onclick="openSshGuideModal()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 text-[10px] rounded border border-slate-700 transition" title="Hướng dẫn kết nối Kali">
+                    <i class="fa-solid fa-book-open"></i>
+                </button>
+            </div>
+            <!-- Hidden required elements for JS logic -->
+            <input id="kali-worker-url" type="hidden" value="http://127.0.0.1:9000">
+            <input id="chk-use-kali" type="checkbox" checked class="hidden">
+            <div id="kali-tools-badges" class="hidden">
+                <span class="kali-tool-pill" data-tool="subfinder"></span>
+                <span class="kali-tool-pill" data-tool="nmap"></span>
+                <span class="kali-tool-pill" data-tool="whatweb"></span>
+                <span class="kali-tool-pill" data-tool="ffuf"></span>
+                <span class="kali-tool-pill" data-tool="nikto"></span>
+            </div>
+            <code id="kali-quick-cmd" class="hidden">sudo apt update && sudo apt install -y nmap whatweb nikto ffuf whois subfinder sslscan wafw00f && sudo systemctl enable --now ssh</code>
+        </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT WRAPPER -->
+    <div class="flex-1 min-w-0 flex flex-col bg-[#0b0f19] h-screen overflow-y-auto">
+        <!-- TOP STICKY HEADER -->
+        <header class="sticky top-0 z-30 bg-[#0d1322]/95 backdrop-blur border-b border-slate-800/80 px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-md">
+            <!-- Target Input & Scan Button -->
+            <div class="flex-1 min-w-[320px] max-w-2xl flex items-center space-x-2">
                 <div class="relative flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                        <i class="fa-solid fa-globe"></i>
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                        <i class="fa-solid fa-globe text-xs"></i>
                     </div>
                     <input id="target-input" type="text" value="" 
-                           placeholder="Nhập tên miền hoặc URL mục tiêu (vd: https://target.edu.vn, https://example.com)..."
-                           class="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-700 rounded-lg text-sm text-cyan-300 font-mono focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition">
+                           placeholder="Nhập tên miền hoặc URL mục tiêu (vd: target.edu.vn, https://example.com)..."
+                           class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-lg text-xs font-mono text-sky-300 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-inner">
                 </div>
 
-                <div class="flex items-center space-x-2">
-                    <button id="btn-start-scan" class="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-lg shadow-lg text-sm flex items-center space-x-2 transition cursor-pointer neon-glow">
-                        <i class="fa-solid fa-magnifying-glass-chart"></i>
-                        <span>BẮT ĐẦU TRINH SÁT & KIỂM TOÁN</span>
-                    </button>
-                </div>
+                <button id="btn-start-scan" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-lg text-xs flex items-center space-x-1.5 shadow transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <span>TRINH SÁT</span>
+                </button>
+
+                <!-- Quick Demo Button -->
+                <button onclick="setDemoTarget()" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs font-mono transition shrink-0" title="Thử nghiệm nhanh mục tiêu mẫu">
+                    <i class="fa-solid fa-flask text-amber-400"></i>
+                    <span class="hidden sm:inline ml-1">Demo</span>
+                </button>
             </div>
 
-            <!-- Options Checkboxes -->
-            <div class="flex flex-wrap items-center justify-between pt-2 border-t border-slate-800/80 text-xs text-slate-400">
-                <div class="flex items-center space-x-6">
-                    <label class="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-                        <input id="chk-subdomain" type="checkbox" checked class="rounded border-slate-700 text-cyan-500 focus:ring-0 bg-slate-900">
-                        <span>Trinh sát Subdomain & Dò Takeover</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-                        <input id="chk-js" type="checkbox" checked class="rounded border-slate-700 text-cyan-500 focus:ring-0 bg-slate-900">
-                        <span>Bóc tách Cú pháp JS AST & Săn BOLA</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-                        <input id="chk-sourcemap" type="checkbox" checked class="rounded border-slate-700 text-cyan-500 focus:ring-0 bg-slate-900">
-                        <span>Khôi phục Mã nguồn từ Source Map (.js.map)</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-                        <input id="chk-secrets" type="checkbox" checked class="rounded border-slate-700 text-cyan-500 focus:ring-0 bg-slate-900">
-                        <span>Săn Khóa Bí mật Shannon Entropy (H &ge; 3.0)</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer hover:text-slate-200">
-                        <input id="chk-vuln" type="checkbox" checked class="rounded border-slate-700 text-rose-500 focus:ring-0 bg-slate-900">
-                        <span class="text-rose-300 font-semibold"><i class="fa-solid fa-shield-virus mr-1"></i>Lỗ hổng Tệp, CORS & Cổng Mạng</span>
-                    </label>
-                </div>
+            <!-- Header Quick Actions -->
+            <div class="flex items-center space-x-2">
+                <button onclick="openCommandPalette()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-2 transition shadow-inner">
+                    <i class="fa-solid fa-terminal text-sky-400"></i>
+                    <span class="hidden md:inline">Lệnh nhanh</span>
+                    <kbd class="px-1.5 py-0.5 text-[10px] bg-slate-950 rounded border border-slate-700 text-sky-400 font-mono font-bold">Ctrl K</kbd>
+                </button>
+                <button onclick="openHistoryModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-xs text-sky-400"></i>
+                    <span class="hidden lg:inline">Lịch sử</span>
+                </button>
+                <a href="/api/report/export" target="_blank" id="btn-header-report" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-file-invoice text-xs text-sky-400"></i>
+                    <span class="hidden lg:inline">Báo cáo</span>
+                </a>
+            </div>
+        </header>
 
-                <div class="flex items-center space-x-2">
-                    <span class="text-slate-500 font-mono">Trạng thái:</span>
-                    <span id="scan-status-text" class="text-slate-400 font-mono">Sẵn sàng (Nhấn Bắt đầu)</span>
+        <!-- SUB-HEADER: Scan Options & Status Bar -->
+        <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 px-6 py-2 bg-slate-900/40">
+            <div class="flex flex-wrap items-center gap-3 text-[11px]">
+                <!-- Scan Profiles Selector -->
+                <div class="flex items-center space-x-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 mr-2 shadow-inner">
+                    <span class="text-slate-500 font-mono text-[10px] uppercase font-bold">Chế độ:</span>
+                    <label class="flex items-center space-x-1 cursor-pointer text-cyan-300 font-semibold" title="Quét nhanh 2-3 phút: Nmap -F, WhatWeb, Nikto 15s">
+                        <input id="scan-profile-fast" type="radio" name="scan-profile" value="fast" checked class="text-cyan-500 bg-slate-900 focus:ring-0">
+                        <span>⚡ Fast Recon</span>
+                    </label>
+                    <span class="text-slate-700">|</span>
+                    <label class="flex items-center space-x-1 cursor-pointer text-purple-300 font-semibold" title="Chuyên sâu thực chiến Red Team: Nmap NSE (http-title, ssl-enum-ciphers, http-methods), ffuf Fuzzing, sslscan, wafw00f">
+                        <input id="scan-profile-deep" type="radio" name="scan-profile" value="deep" class="text-purple-500 bg-slate-900 focus:ring-0">
+                        <span>🔥 Deep Pentest</span>
+                    </label>
                 </div>
+                <span class="text-slate-500 font-mono"><i class="fa-solid fa-sliders mr-1 text-sky-400"></i>Tùy chọn:</span>
+                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
+                    <input id="chk-subdomain" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
+                    <span>Subdomain & Takeover</span>
+                </label>
+                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
+                    <input id="chk-js" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
+                    <span>JS AST & BOLA</span>
+                </label>
+                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
+                    <input id="chk-sourcemap" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
+                    <span>Source Map (.js.map)</span>
+                </label>
+                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
+                    <input id="chk-secrets" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
+                    <span>Shannon Secrets (H&ge;3.0)</span>
+                </label>
+                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
+                    <input id="chk-vuln" type="checkbox" checked class="rounded border-slate-700 text-rose-500 bg-slate-900">
+                    <span class="text-rose-300">File & Port Vulns</span>
+                </label>
+            </div>
+            <div class="flex items-center space-x-2 text-[11px] font-mono">
+                <span class="text-slate-500">Trạng thái:</span>
+                <span id="scan-status-text" class="text-slate-400">Sẵn sàng (Nhấn Trinh sát)</span>
             </div>
         </div>
 
-        <!-- Live Scan Progress Bar (Active during background execution) -->
+        <!-- MAIN SCROLLABLE CONTENT AREA -->
+        <main class="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto">
+<!-- Live Scan Progress Bar (Active during background execution) -->
         <div id="scan-progress-container" class="hidden bg-slate-900 border border-cyan-800/40 rounded-xl p-3.5 space-y-2 shadow-lg cyber-scanner-active">
             <div class="flex items-center justify-between text-xs font-mono">
                 <span id="scan-progress-stage" class="text-cyan-400 flex items-center space-x-2">
@@ -335,18 +508,17 @@
         </div>
 
                 <!-- Risk Exposure Scorecard & Quick Action Bar -->
-        <div class="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900 border border-cyber-border rounded-xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center space-x-5">
+        <div class="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900 border border-cyber-border rounded-xl p-5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 overflow-hidden">
+            <div class="flex items-center space-x-5 min-w-0">
                 <!-- Grade Badge -->
-                <div id="grade-badge" class="w-20 h-20 rounded-2xl bg-slate-800 border border-slate-700 flex flex-col items-center justify-center font-bold shadow-inner">
+                <div id="grade-badge" class="w-20 h-20 rounded-2xl bg-slate-800 border border-slate-700 flex flex-col items-center justify-center font-bold shadow-inner shrink-0">
                     <span id="stat-grade" class="text-3xl text-cyan-400 font-extrabold">-</span>
                     <span class="text-[9px] uppercase tracking-wider text-slate-400">XẾP LOẠI</span>
                 </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <h2 class="text-lg font-bold text-white">Bề Mặt Rủi Ro & Đánh Giá An Ninh</h2>
-                        <span id="stat-risk-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">CHƯA QUÉT</span>
-                        
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-lg font-bold text-white truncate">Bề Mặt Rủi Ro & Đánh Giá An Ninh</h2>
+                        <span id="stat-risk-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0">CHƯA QUÉT</span>
                     </div>
                     <p class="text-xs text-slate-400 mt-1">
                         Điểm phơi nhiễm bề mặt: <b id="stat-score-text" class="text-cyan-400 text-sm">--/100</b>
@@ -356,12 +528,12 @@
             </div>
 
             <!-- Export Buttons -->
-            <div class="flex items-center space-x-3 w-full md:w-auto">
-                <a id="btn-export-report" href="/api/report/export" target="_blank" class="flex-1 md:flex-none px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-lg text-xs flex items-center justify-center space-x-2 shadow-lg transition">
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full xl:w-auto shrink-0 justify-start xl:justify-end">
+                <a id="btn-export-report" href="/api/report/export" target="_blank" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-lg text-xs flex items-center justify-center space-x-2 shadow-lg transition whitespace-nowrap">
                     <i class="fa-solid fa-file-pdf"></i>
                     <span>Xuất Báo Cáo Thẩm Định (HTML/PDF)</span>
                 </a>
-                <a id="btn-export-openapi" href="/api/openapi/download" class="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold rounded-lg border border-cyan-500/40 text-xs flex items-center justify-center space-x-2 transition">
+                <a id="btn-export-openapi" href="/api/openapi/download" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold rounded-lg border border-cyan-500/40 text-xs flex items-center justify-center space-x-2 transition whitespace-nowrap">
                     <i class="fa-solid fa-download"></i>
                     <span>Xuất Chuẩn OpenAPI 3.0 (Swagger/Postman)</span>
                 </a>
@@ -468,9 +640,15 @@
                     <button id="btn-graph-fullscreen" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition" title="Phóng to toàn màn hình">
                         <i class="fa-solid fa-maximize mr-1"></i> Toàn màn hình
                     </button>
+                    <div class="h-4 w-px bg-slate-700 mx-1"></div>
+                    <button id="btn-toggle-graph" onclick="toggleGraphCollapse()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded border border-slate-700 font-mono transition" title="Thu gọn hoặc mở rộng đồ thị">
+                        <i class="fa-solid fa-chevron-up mr-1" id="icon-toggle-graph"></i><span id="text-toggle-graph">Thu gọn</span>
+                    </button>
                 </div>
             </div>
 
+            <!-- Collapsible Body for Graph & Filters -->
+            <div id="cy-container-body">
             <!-- Filter Category Bar -->
             <div class="px-5 py-2 border-b border-cyber-border/70 bg-slate-950/80 flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-400 font-mono text-[11px]"><i class="fa-solid fa-filter mr-1 text-cyan-400"></i>Lọc Node:</span>
@@ -554,64 +732,11 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 10 Comprehensive Results Tabs -->
-        <div class="bg-cyber-card border border-cyber-border rounded-xl overflow-hidden shadow-2xl">
-            <!-- Tab Headers -->
-            <div class="flex flex-wrap border-b border-cyber-border bg-slate-900/80">
-                <button class="tab-btn active px-4 py-3 text-xs sm:text-sm font-semibold text-cyan-400 border-b-2 border-cyan-400 flex items-center space-x-1.5 transition" data-target="tab-subdomains">
-                    <i class="fa-solid fa-network-wired text-cyan-400"></i>
-                    <span>Tổng Quan & Bản Đồ Hạ Tầng</span>
-                    <span id="badge-sub-count" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-apis">
-                    <i class="fa-solid fa-code text-emerald-400"></i>
-                    <span>Bóc Tách API & BOLA Surface</span>
-                    <span id="badge-api-count" class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-secrets">
-                    <i class="fa-solid fa-key text-rose-400"></i>
-                    <span>Phân Tích Mã Nguồn & Secrets</span>
-                    <span id="badge-sec-count" class="text-[10px] bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-sourcemaps">
-                    <i class="fa-solid fa-folder-tree text-amber-400"></i>
-                    <span>Source Map Mini IDE</span>
-                    <span id="badge-maps-count" class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-vulns">
-                    <i class="fa-solid fa-shield-virus text-rose-400"></i>
-                    <span>Kiểm Toán Lỗ Hổng & Cổng Mạng</span>
-                    <span id="badge-vuln-count" class="text-[10px] bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-osint">
-                    <i class="fa-solid fa-file-shield text-blue-400"></i>
-                    <span>Tài Liệu Công Khai & OSINT</span>
-                    <span id="badge-docs-count" class="text-[10px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-owasp">
-                    <i class="fa-solid fa-chart-pie text-cyan-400"></i>
-                    <span>Mô Hình OWASP API Top 10</span>
-                    <span id="badge-owasp-count" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-kali-terminal">
-                    <i class="fa-solid fa-terminal text-purple-400"></i>
-                    <span>Nhật Ký Dual-Node & Kali</span>
-                    <span id="badge-cli-count" class="text-[10px] bg-purple-950 text-purple-300 border border-purple-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-history">
-                    <i class="fa-solid fa-clock-rotate-left text-orange-400"></i>
-                    <span>Lịch Sử & So Sánh Quét</span>
-                    <span id="badge-history-count" class="text-[10px] bg-orange-950 text-orange-300 border border-orange-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-                <button class="tab-btn px-4 py-3 text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5 transition" data-target="tab-easm">
-                    <i class="fa-solid fa-satellite-dish text-indigo-400"></i>
-                    <span>EASM & Giám Sát Tự Động</span>
-                    <span id="badge-sched-count" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full font-mono">0</span>
-                </button>
-            </div>
-
-            <!-- Tab 1 Contents: Subdomains & Infrastructure Overview -->
+            <!-- Tab Contents Container -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl overflow-hidden shadow-xl">
+<!-- Tab 1 Contents: Subdomains & Infrastructure Overview -->
             <div id="tab-subdomains" class="tab-content p-5 space-y-6">
                 <!-- 1. Technology Stack Recognition -->
                 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 sm:p-5 space-y-3 shadow-xl">
@@ -641,7 +766,13 @@
                                 <p class="text-xs text-slate-400 mt-0.5">Thu thập qua DNS, Certificate Transparency và dò tìm bản ghi CNAME mồ côi (Dangling CNAME)</p>
                             </div>
                         </div>
-                        <span id="wildcard-indicator" class="text-xs font-mono text-slate-400"></span>
+                        <div class="flex items-center space-x-2">
+                            <span id="wildcard-indicator" class="text-xs font-mono text-slate-400"></span>
+                            <button onclick="exportSubdomainsTxt()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 rounded-lg text-xs font-mono transition flex items-center space-x-1.5 shadow-sm" title="Xuất danh sách Target / Subdomain text (.txt) cho các công cụ khác">
+                                <i class="fa-solid fa-file-arrow-down text-sky-400"></i>
+                                <span>Export Subdomains.txt</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto border border-slate-800 rounded-lg">
                         <table class="w-full text-left text-xs text-slate-300">
@@ -1539,10 +1670,10 @@
                 </div>
             </div>
         </div>
-
+        <!-- End of Tab Contents Container -->
     </main>
-
-    <!-- NATIVE LIVE API TESTER CONSOLE (SLIDE-OVER DRAWER) -->
+</div>
+<!-- NATIVE LIVE API TESTER CONSOLE (SLIDE-OVER DRAWER) -->
     <div id="api-tester-drawer" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-end">
         <div class="w-full max-w-2xl bg-cyber-card border-l border-cyber-border h-full shadow-2xl flex flex-col p-6 space-y-4 overflow-y-auto drawer-content-animated">
             <div class="flex items-center justify-between border-b border-cyber-border pb-3">
@@ -2297,7 +2428,8 @@
                         tech_fingerprint: true,
                         entropy_threshold: 3.0,
                         use_kali_worker: document.getElementById('chk-use-kali') ? document.getElementById('chk-use-kali').checked : true,
-                        worker_url: document.getElementById('kali-worker-url') ? document.getElementById('kali-worker-url').value.trim() : "192.168.1.100:22"
+                        worker_url: document.getElementById('kali-worker-url') ? document.getElementById('kali-worker-url').value.trim() : "192.168.1.100:22",
+                        scan_profile: document.querySelector('input[name="scan-profile"]:checked')?.value || 'fast'
                     })
                 });
 
@@ -2345,6 +2477,13 @@
                     else if (pct >= 25) curStage = 2;
                     else curStage = 1;
                     renderPipelineVisualizer(null, curStage);
+
+                    // Dual Terminal Live HUD real-time streaming
+                    if (stData.cli_logs && stData.cli_logs.length > 0) {
+                        renderDualTerminalLogs(stData.cli_logs, stData.handoff_logs || []);
+                        const cliBadge = document.getElementById('badge-cli-count');
+                        if (cliBadge) cliBadge.textContent = stData.cli_logs.length;
+                    }
 
                     if (progBar) progBar.style.width = `${pct}%`;
                     if (progPercent) progPercent.textContent = `${pct}%`;
@@ -2533,9 +2672,9 @@
                         const cnamesText = asArray(s.cnames).length ? asArray(s.cnames).join(', ') : '<span class="text-slate-600">-</span>';
 
                         row.innerHTML = `
-                            <td class="py-2.5 px-4 font-bold text-cyan-300">${s.subdomain || '-'}</td>
-                            <td class="py-2.5 px-4 text-slate-300">${ipsText}</td>
-                            <td class="py-2.5 px-4 text-slate-400">${cnamesText}</td>
+                            <td class="py-2.5 px-4 font-bold text-cyan-300">${escapeHtml(s.subdomain) || '-'}</td>
+                            <td class="py-2.5 px-4 text-slate-300">${escapeHtml(ipsText)}</td>
+                            <td class="py-2.5 px-4 text-slate-400">${escapeHtml(cnamesText)}</td>
                             <td class="py-2.5 px-4">${takeoverBadge}</td>
                             <td class="py-2.5 px-4">${statusBadge}</td>
                         `;
@@ -2559,10 +2698,10 @@
                             ? `<span class="bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono text-[10px]">ĐẠT CHUẨN</span>`
                             : `<span class="bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded font-mono text-[10px] font-bold">${h.severity || 'HIGH'}</span>`;
                         row.innerHTML = `
-                            <td class="py-2.5 px-4 font-mono font-semibold text-white">${h.header || h.name || '-'}</td>
+                            <td class="py-2.5 px-4 font-mono font-semibold text-white">${escapeHtml(h.header || h.name || '-')}</td>
                             <td class="py-2.5 px-4">${sevBadge}</td>
-                            <td class="py-2.5 px-4 font-mono text-slate-400 text-xs">${h.cwe || '-'}</td>
-                            <td class="py-2.5 px-4 text-slate-300 text-xs">${h.recommendation || '-'}</td>
+                            <td class="py-2.5 px-4 font-mono text-slate-400 text-xs">${escapeHtml(h.cwe || '-')}</td>
+                            <td class="py-2.5 px-4 text-slate-300 text-xs">${escapeHtml(h.recommendation || '-')}</td>
                         `;
                         headTable.appendChild(row);
                     });
@@ -3221,9 +3360,17 @@
                     <td class="py-2.5 px-4">${bolaBadge}</td>
                     <td class="py-2.5 px-4 text-slate-400 text-xs" title="${ep.source_file}">${fileShort}</td>
                     <td class="py-2.5 px-4 text-center">
-                        <button onclick="openApiTester('${ep.endpoint}', '${ep.method}')" class="px-3 py-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded text-[11px] font-bold transition shadow">
-                            <i class="fa-solid fa-terminal mr-1"></i>Kiểm thử
-                        </button>
+                        <div class="flex items-center justify-center space-x-1.5">
+                            <button onclick="openApiTester('${ep.endpoint}', '${ep.method}')" class="px-2.5 py-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded text-[10px] font-bold transition shadow" title="Kiểm thử API trực tiếp">
+                                <i class="fa-solid fa-terminal mr-1"></i>Test
+                            </button>
+                            <button onclick="copyCurl('${escapeJs(ep.endpoint)}', '${ep.method}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 rounded text-[10px] font-mono transition" title="Sao chép lệnh cURL">
+                                <i class="fa-regular fa-copy"></i> cURL
+                            </button>
+                            <button onclick="copyBurpCurl('${escapeJs(ep.endpoint)}', '${ep.method}')" class="px-2 py-1 bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800 rounded text-[10px] font-mono transition" title="Gửi qua Burp Suite Proxy (127.0.0.1:8080)">
+                                <i class="fa-solid fa-shield-halved"></i> Burp
+                            </button>
+                        </div>
                     </td>
                 `;
                 table.appendChild(row);
@@ -4437,8 +4584,46 @@ export default AuthService;`;
         });
         }
 
+        function escapeJs(str) {
+            return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        }
+
+        function exportSubdomainsTxt() {
+            const scanId = (currentScanData && currentScanData.scan_id) ? currentScanData.scan_id : 'latest';
+            window.open(`/api/scans/${scanId}/export/subdomains.txt`, '_blank');
+        }
+
+        function copyCurl(endpoint, method = 'GET') {
+            const target = (currentScanData && (currentScanData.target || currentScanData.domain)) || (document.getElementById('target-input')?.value.trim()) || 'example.com';
+            const baseUrl = target.startsWith('http') ? target.replace(/\/$/, '') : `https://${target}`;
+            const cleanEp = endpoint.startsWith('http') ? endpoint : `${baseUrl}/${endpoint.replace(/^\//, '')}`;
+            const cmd = `curl -i -k -X ${method} "${cleanEp}"`;
+            copyToClipboard(cmd);
+            if (typeof showToast === 'function') {
+                showToast(`Đã sao chép cURL: ${method} ${cleanEp}`, 'success');
+            } else {
+                alert(`Đã sao chép cURL: ${cmd}`);
+            }
+        }
+
+        function copyBurpCurl(endpoint, method = 'GET') {
+            const target = (currentScanData && (currentScanData.target || currentScanData.domain)) || (document.getElementById('target-input')?.value.trim()) || 'example.com';
+            const baseUrl = target.startsWith('http') ? target.replace(/\/$/, '') : `https://${target}`;
+            const cleanEp = endpoint.startsWith('http') ? endpoint : `${baseUrl}/${endpoint.replace(/^\//, '')}`;
+            const cmd = `curl -i -k -x http://127.0.0.1:8080 -X ${method} "${cleanEp}"`;
+            copyToClipboard(cmd);
+            if (typeof showToast === 'function') {
+                showToast(`Đã sao chép cURL qua Burp Suite Proxy (127.0.0.1:8080)! Mở Repeater để khai thác.`, 'success');
+            } else {
+                alert(`Đã sao chép lệnh qua Burp Proxy:\n${cmd}`);
+            }
+        }
+
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => alert('Đã sao chép vào bộ nhớ tạm!')).catch(() => prompt('Sao chép:', text));
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof showToast === 'function') showToast('Đã sao chép vào bộ nhớ tạm!', 'success');
+                else alert('Đã sao chép vào bộ nhớ tạm!');
+            }).catch(() => prompt('Sao chép:', text));
         }
 
         function copyBase64Secret(b64) {
@@ -4594,20 +4779,9 @@ export default AuthService;`;
             }, 250);
         });
 
-        // Auto-ping Kali Agent and auto-load latest scan from SQLite on initial page load
+        // Auto-ping Kali Agent on initial page load (Giữ giao diện ở trạng thái mặc định)
         setTimeout(async () => {
             pingKaliAgent();
-            try {
-                const histRes = await fetch('/api/scans/history');
-                if (histRes.ok) {
-                    const hist = asArray(await histRes.json());
-                    if (hist.length > 0 && hist[0].scan_id) {
-                        loadHistoricalScan(hist[0].scan_id, false);
-                    }
-                }
-            } catch (e) {
-                console.debug('Initial history load skipped:', e);
-            }
         }, 600);
 
         // ==========================================
@@ -4779,8 +4953,8 @@ export default AuthService;`;
 
             if (resBox) {
                 resBox.classList.remove('hidden');
-                resBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang kiểm tra kết nối SSH tới Kali...';
-                resBox.className = 'text-xs font-mono p-2.5 rounded bg-slate-900 border border-slate-700 text-cyan-300';
+                resBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang chẩn đoán kết nối SSH & kiểm tra toolchain Kali...';
+                resBox.className = 'text-xs font-mono p-3 rounded bg-slate-900 border border-slate-700 text-cyan-300';
             }
 
             try {
@@ -4790,23 +4964,49 @@ export default AuthService;`;
                     body: JSON.stringify({ host, port, user, password })
                 });
                 const data = await res.json();
-                if (data.reachable) {
+                const oneLiner = data.one_liner || 'sudo apt update && sudo apt install -y nmap whatweb nikto ffuf whois subfinder sslscan wafw00f && sudo systemctl enable --now ssh';
+
+                if (data.reachable && !data.warning) {
                     resBox.innerHTML = `
-                        <div class="text-emerald-400 font-bold mb-1"><i class="fa-solid fa-circle-check mr-1"></i> Kết nối SSH thành công!</div>
-                        <div class="text-slate-400">Máy chủ: ${data.uname}</div>
-                        <div class="text-slate-400">Công cụ sẵn sàng: <span class="text-cyan-300">${(data.installed_tools || []).join(', ') || 'N/A'}</span></div>
+                        <div class="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>${data.message || 'Kết nối SSH thành công!'}</span>
+                        </div>
+                        <div class="text-slate-300 text-[11px]">Hệ điều hành: <span class="text-cyan-300">${data.uname || 'Linux'}</span></div>
+                        <div class="text-slate-300 text-[11px] mt-1">Công cụ pentest sẵn sàng: <span class="text-emerald-400 font-bold">${(data.installed_tools || []).join(', ')}</span></div>
+                        <div class="text-slate-400 text-[10px] mt-1.5 italic">${data.guidance || 'Hệ thống đã sẵn sàng cho cả Fast Recon và Deep Pentest.'}</div>
                     `;
-                    resBox.className = 'text-xs font-mono p-2.5 rounded bg-emerald-950/80 border border-emerald-700 text-emerald-300';
+                    resBox.className = 'text-xs font-mono p-3 rounded bg-emerald-950/80 border border-emerald-700 text-emerald-300';
+                } else if (data.reachable && data.warning) {
+                    resBox.innerHTML = `
+                        <div class="text-amber-400 font-bold mb-1 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>${data.message}</span>
+                        </div>
+                        <div class="text-slate-300 text-[11px]">Đã cài: <span class="text-emerald-400">${(data.installed_tools || []).join(', ') || 'Chưa có'}</span></div>
+                        <div class="text-rose-400 text-[11px] mt-0.5">Còn thiếu: <span class="font-bold underline">${(data.missing_tools || []).join(', ')}</span></div>
+                        <div class="mt-2 text-[10px] text-slate-300 bg-slate-950 p-2 rounded border border-amber-900/60 flex items-center justify-between">
+                            <code class="select-all text-amber-300 truncate pr-2">${oneLiner}</code>
+                            <button onclick="copyToClipboard('${oneLiner}')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[10px] shrink-0 border border-slate-700">Chép lệnh</button>
+                        </div>
+                    `;
+                    resBox.className = 'text-xs font-mono p-3 rounded bg-amber-950/80 border border-amber-700 text-amber-200';
                 } else {
                     resBox.innerHTML = `
-                        <div class="text-rose-400 font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Không thể kết nối SSH!</div>
-                        <div class="text-slate-400">${data.message || data.error}</div>
-                        <div class="text-amber-400 mt-1">Gợi ý: Mở Kali Linux gõ lệnh: <code>sudo systemctl start ssh</code></div>
+                        <div class="text-rose-400 font-bold mb-1 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                            <span>${data.message || 'Không thể kết nối SSH!'}</span>
+                        </div>
+                        <div class="text-amber-300 text-[11px] mt-1">👉 ${data.guidance || 'Kiểm tra lại mạng hoặc mở SSH trên Kali.'}</div>
+                        <div class="mt-2 text-[10px] text-slate-300 bg-slate-950 p-2 rounded border border-rose-900/60 flex items-center justify-between">
+                            <code class="select-all text-cyan-300 truncate pr-2">${oneLiner}</code>
+                            <button onclick="copyToClipboard('${oneLiner}')" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[10px] shrink-0 border border-slate-700">Chép lệnh</button>
+                        </div>
                     `;
-                    resBox.className = 'text-xs font-mono p-2.5 rounded bg-rose-950/80 border border-rose-700 text-rose-300';
+                    resBox.className = 'text-xs font-mono p-3 rounded bg-rose-950/80 border border-rose-700 text-rose-300';
                 }
             } catch (e) {
-                if (resBox) resBox.innerHTML = `<span class="text-rose-400">Lỗi: ${e.message}</span>`;
+                if (resBox) resBox.innerHTML = `<span class="text-rose-400">Lỗi kiểm tra SSH: ${e.message}</span>`;
             }
         }
 

@@ -4,6 +4,7 @@ Produces a self-contained, beautifully formatted HTML report ready for project d
 Includes OWASP API Top 10, Exposed Sensitive Files, CORS, Ports & SSL Audit.
 """
 
+import re
 from datetime import datetime
 from typing import Dict, Any
 
@@ -72,6 +73,9 @@ class ReportGenerator:
         .sev-high {{ color: #fb923c; font-weight: 700; }}
         .sev-med {{ color: #facc15; font-weight: 700; }}
         .sev-low {{ color: #38bdf8; }}
+        .poc-card {{ background: #090d16; border: 1px solid #334155; border-left: 4px solid #38bdf8; border-radius: 8px; padding: 14px; margin-bottom: 14px; }}
+        .poc-cmd {{ background: #020617; border: 1px solid #1e293b; color: #a5f3fc; padding: 8px 12px; border-radius: 6px; overflow-x: auto; margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; white-space: pre-wrap; word-break: break-all; }}
+        .poc-snippet {{ background: #0b1120; border: 1px dashed #334155; color: #cbd5e1; padding: 6px 10px; border-radius: 4px; margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }}
         .remed-box {{ background: #022c22; border: 1px solid #059669; border-radius: 8px; padding: 15px; margin-top: 20px; }}
         .remed-box h4 {{ color: #34d399; font-size: 14px; margin-bottom: 8px; }}
         .remed-box ul {{ padding-left: 20px; font-size: 13px; color: #a7f3d0; }}
@@ -168,12 +172,13 @@ class ReportGenerator:
             html += """<tr><td colspan="4" style="text-align: center; color: #64748b;">Không phát hiện file nhạy cảm hay lỗi CORS công khai.</td></tr>"""
         else:
             for sf in sensitive_files:
-                sev_cls = "sev-crit" if sf["severity"] == "CRITICAL" else ("sev-high" if sf["severity"] == "HIGH" else "sev-med")
+                severity = sf.get("severity", "HIGH")
+                sev_cls = "sev-crit" if severity == "CRITICAL" else ("sev-high" if severity == "HIGH" else "sev-med")
                 html += f"""
                     <tr>
-                        <td><b>{sf.get('name')}</b></td>
-                        <td class="{sev_cls}">{sf.get('severity')}</td>
-                        <td class="font-mono text-cyan-400">{sf.get('url')}</td>
+                        <td><b>{sf.get('name', 'Sensitive File')}</b></td>
+                        <td class="{sev_cls}">{severity}</td>
+                        <td class="font-mono text-cyan-400">{sf.get('url', '')}</td>
                         <td class="font-mono" style="font-size: 11px;">{sf.get('snippet', '')[:60]}...</td>
                     </tr>
                 """
@@ -284,6 +289,72 @@ class ReportGenerator:
         html += f"""
             </tbody>
         </table>
+
+        <div class="section-title">6. Proof of Concept (PoC) & Bằng Chứng Khai Thác (Evidence)</div>
+        <div style="margin-bottom: 25px;">
+        """
+
+        poc_count = 0
+        # 1. Leaked Secrets PoC
+        if secrets:
+            for s in secrets[:6]:
+                poc_count += 1
+                html += f"""
+                    <div class="poc-card">
+                        <div style="font-weight: 700; color: #f87171; font-size: 13px;">[PoC #{poc_count}] Rò rỉ Khóa Bí Mật: {s.get('secret_type')}</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Tệp nguồn: <span class="font-mono text-cyan-300">{s.get('source_file')}</span> | Dòng: L{s.get('line_number', 1)} | Entropy: <span class="sev-crit">{s.get('entropy')}</span></div>
+                        <div class="poc-snippet">Giá trị token (Masked): {s.get('masked_value')}</div>
+                        <div class="poc-cmd">curl -i -k -H "Authorization: Bearer {s.get('masked_value', 'TOKEN')}" "https://{target}/api/v1/auth/verify"</div>
+                    </div>
+                """
+
+        # 2. Exposed Sensitive Files PoC
+        if sensitive_files:
+            for sf in sensitive_files[:6]:
+                poc_count += 1
+                f_url = sf.get('url') or f"https://{target}/{sf.get('name')}"
+                html += f"""
+                    <div class="poc-card" style="border-left-color: #fb923c;">
+                        <div style="font-weight: 700; color: #fb923c; font-size: 13px;">[PoC #{poc_count}] File Nhạy Cảm Lộ Thiên: {sf.get('name')}</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">URL: <span class="font-mono text-cyan-300">{f_url}</span></div>
+                        {f'<div class="poc-snippet">Phản hồi mẫu: {sf.get("snippet", "")[:120]}...</div>' if sf.get("snippet") else ''}
+                        <div class="poc-cmd">curl -i -k -s "{f_url}"</div>
+                    </div>
+                """
+
+        # 3. Open Risky Ports & Service Banners
+        risky_p = [p for p in open_ports if p.get('is_risky') or p.get('port') in [21, 22, 23, 445, 1433, 3306, 5432, 6379, 9200, 27017]]
+        if risky_p:
+            for p in risky_p[:4]:
+                poc_count += 1
+                html += f"""
+                    <div class="poc-card" style="border-left-color: #f87171;">
+                        <div style="font-weight: 700; color: #f87171; font-size: 13px;">[PoC #{poc_count}] Phơi Nhiễm Cổng Dịch Vụ Cơ Sở Dữ Liệu / Quản Trị: Port {p.get('port')}</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Service: <span class="font-mono text-cyan-300">{p.get('service')}</span> | Version: {p.get('version', 'N/A')}</div>
+                        <div class="poc-cmd">nmap -sV -p {p.get('port')} --script=banner {target}</div>
+                    </div>
+                """
+
+        # 4. BOLA Candidate API PoC (Burp Suite Proxy & cURL template)
+        bola_eps = [ep for ep in endpoints if ep.get('is_bola_candidate')]
+        if bola_eps:
+            for ep in bola_eps[:4]:
+                poc_count += 1
+                base_ep = ep.get('endpoint', '/')
+                test_ep = re.sub(r"\{[a-zA-Z0-9_]+\}", "1001", base_ep)
+                html += f"""
+                    <div class="poc-card" style="border-left-color: #a855f7;">
+                        <div style="font-weight: 700; color: #c084fc; font-size: 13px;">[PoC #{poc_count}] Nghi Vấn BOLA / IDOR: {ep.get('method', 'GET')} {base_ep}</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Gửi request qua Burp Suite Proxy (127.0.0.1:8080) để kiểm tra kiểm soát phân quyền đối tượng:</div>
+                        <div class="poc-cmd">curl -i -k -x http://127.0.0.1:8080 -X {ep.get('method', 'GET')} "https://{target}{test_ep}" -H "X-User-ID: 1001"</div>
+                    </div>
+                """
+
+        if poc_count == 0:
+            html += """<div style="text-align: center; color: #64748b; padding: 20px; border: 1px dashed #334155; border-radius: 8px;">Mục tiêu có tư thế an ninh tốt; không phát hiện bằng chứng rò rỉ secret hoặc lỗ hổng nghiêm trọng để trích xuất PoC.</div>"""
+
+        html += f"""
+        </div>
 
         <div class="remed-box">
             <h4>Kế hoạch Khắc phục & Khuyến nghị Bảo mật Ưu tiên:</h4>
