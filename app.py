@@ -43,6 +43,17 @@ from core.report_generator import ReportGenerator
 from core.db_manager import db_manager
 from core.asset_diff_notifier import AssetDiffEngine, DiscordNotifier
 from core.kali_ssh_bridge import KaliSSHBridge
+from core.scope_validator import ScopeValidator, ScopeEvaluationResult
+from core.spa_crawler import DynamicSpaCrawler, SpaCrawlResult
+from core.active_bola_validator import (
+    ActiveAuthorizationValidator,
+    UserContext,
+    AuthorizationAuditResult,
+    ActiveExploitValidator,
+    ExploitAuditResult
+)
+from core.auth_session_manager import AuthSessionManager, AuthSessionConfig, BurpSuiteForwarder
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -2146,6 +2157,29 @@ async def export_audit_report(scan_id: Optional[str] = None):
     return HTMLResponse(content=report_html)
 
 
+@app.get("/api/report/json")
+@app.get("/api/report/json/{scan_id}")
+async def get_report_json(scan_id: Optional[str] = None):
+    """
+    Returns standardized PTES/SysReptor JSON security audit report.
+    """
+    global latest_scan_cache
+    data = None
+    if scan_id:
+        data = db_manager.get_scan_results(scan_id)
+    if not data:
+        data = latest_scan_cache
+    if not data:
+        hist = db_manager.list_history(limit=1)
+        if hist and hist[0].get("scan_id"):
+            data = db_manager.get_scan_results(hist[0]["scan_id"])
+    if not data:
+        raise HTTPException(status_code=404, detail="No scan data found. Please run a scan first.")
+
+    report_json = ReportGenerator.generate_json_report(data)
+    return JSONResponse(content=report_json)
+
+
 @app.get("/api/openapi/{scan_id}")
 @app.get("/api/openapi/download")
 async def download_openapi(scan_id: Optional[str] = None):
@@ -2340,6 +2374,243 @@ async def test_discord_webhook_endpoint(req: DiscordTestRequest):
     if not success:
         raise HTTPException(status_code=400, detail="Không thể gửi tin nhắn thử nghiệm tới Discord Webhook. Vui lòng kiểm tra lại URL.")
     return {"status": "SUCCESS", "message": "Đã gửi thông báo thử nghiệm thành công tới Discord!"}
+# =========================================================================
+# MODULE 11: SCOPE CONTROL & TARGET WHITELIST (core/scope_validator.py)
+# =========================================================================
+class ScopeValidateRequest(BaseModel):
+    target: str
+    in_scope: Optional[List[str]] = None
+    out_of_scope: Optional[List[str]] = None
+    allow_private_ips: bool = False
+
+@app.post("/api/scope/validate")
+async def validate_scope_api(req: ScopeValidateRequest):
+    """
+    Evaluates whether a target host or URL complies with defined scope boundaries.
+    Prevents unauthorized out-of-scope testing, third-party scanning, and SSRF.
+    """
+    try:
+        validator = ScopeValidator(
+            whitelist_domains=req.in_scope or [],
+            out_of_scope_domains=req.out_of_scope or [],
+            allow_private_ips=req.allow_private_ips
+        )
+        res = await validator.evaluate_scope(req.target)
+        return {
+            "target": res.target,
+            "hostname": res.hostname,
+            "is_in_scope": res.is_in_scope,
+            "matched_rule": res.matched_rule,
+            "resolved_ips": res.resolved_ips,
+            "cnames": res.cnames,
+            "warning": res.warning,
+            "is_third_party": res.is_third_party
+        }
+    except Exception as e:
+        logger.error(f"[ScopeValidator Error] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e), "is_in_scope": False})
+
+
+# =========================================================================
+# MODULE 12: DYNAMIC SPA CRAWLER (core/spa_crawler.py)
+# =========================================================================
+class SpaCrawlRequest(BaseModel):
+    url: str
+    timeout_ms: Optional[int] = 20000
+
+@app.post("/api/crawler/spa")
+async def crawl_spa_api(req: SpaCrawlRequest):
+    """
+    Executes headless Playwright crawler on client-side SPAs (React, Vue, Vite).
+    Captures dynamically loaded JS chunks, API calls, and sourcemap links.
+    """
+    try:
+        crawler = DynamicSpaCrawler(navigation_timeout_ms=req.timeout_ms or 20000)
+        res = await crawler.crawl(req.url)
+        return {
+            "target_url": res.target_url,
+            "discovered_scripts": res.discovered_scripts,
+            "sourcemaps": res.sourcemaps,
+            "api_endpoints": res.api_endpoints,
+            "page_title": res.page_title,
+            "dom_scripts": res.dom_scripts,
+            "execution_time_seconds": res.execution_time_seconds,
+            "engine_used": res.engine_used,
+            "error": res.error
+        }
+    except Exception as e:
+        logger.error(f"[SpaCrawler Error] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+# =========================================================================
+# MODULE 13: DUAL-TOKEN ACTIVE BOLA / IDOR VALIDATOR (core/active_bola_validator.py)
+# =========================================================================
+class ActiveBolaRequest(BaseModel):
+    endpoint_template: str
+    base_url: str
+    user_a_token: str
+    user_b_token: str
+    user_a_resource: str
+    user_b_resource: str
+    method: Optional[str] = "GET"
+
+@app.post("/api/bola/audit")
+async def audit_bola_api(req: ActiveBolaRequest):
+    """
+    Conducts active cross-tenant authorization audit using dual security principals.
+    Compares baseline response (User B) against unauthorized request (User A on User B ID).
+    """
+    try:
+        user_a = UserContext(name="Tenant_A", token=req.user_a_token, resource_ids=[req.user_a_resource])
+        user_b = UserContext(name="Tenant_B", token=req.user_b_token, resource_ids=[req.user_b_resource])
+        validator = ActiveAuthorizationValidator(timeout_seconds=10.0)
+        results = await validator.verify_endpoint(
+            base_url=req.base_url,
+            endpoint_template=req.endpoint_template,
+            user_a=user_a,
+            user_b=user_b,
+            method=req.method or "GET"
+        )
+        return {
+            "results": [
+                {
+                    "endpoint_template": r.endpoint_template,
+                    "tested_url": r.tested_url,
+                    "is_vulnerable": r.is_vulnerable,
+                    "severity": r.severity,
+                    "vulnerability_type": r.vulnerability_type,
+                    "status_code_a": r.status_code_a,
+                    "status_code_b": r.status_code_b,
+                    "response_time_ms": r.response_time_ms,
+                    "curl_reproduction": r.curl_reproduction,
+                    "details": r.details
+                }
+                for r in results
+            ]
+        }
+    except Exception as e:
+        logger.error(f"[ActiveBola Error] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+class ActiveExploitRequest(BaseModel):
+    target_url: str
+    param_name: Optional[str] = "id"
+    method: Optional[str] = "GET"
+    vuln_type: Optional[str] = "ALL"  # "ALL", "SQLI", "XSS"
+    auth_header: Optional[str] = None
+
+
+@app.post("/api/exploit/audit")
+async def audit_exploit_api(req: ActiveExploitRequest):
+    """
+    Executes targeted active validation for SQLi and XSS vulnerabilities
+    derived from exploit-sqli and exploit-xss agent skills.
+    """
+    try:
+        headers = {}
+        if req.auth_header:
+            headers["Authorization"] = req.auth_header
+
+        validator = ActiveExploitValidator(timeout_seconds=8.0)
+        findings = []
+        param = req.param_name or "id"
+        vtype = (req.vuln_type or "ALL").upper()
+
+        if vtype in ("ALL", "SQLI"):
+            sqli_results = await validator.audit_sqli_parameter(
+                base_url=req.target_url,
+                param_name=param,
+                method=req.method or "GET",
+                headers=headers
+            )
+            findings.extend(sqli_results)
+
+        if vtype in ("ALL", "XSS"):
+            xss_results = await validator.audit_xss_parameter(
+                base_url=req.target_url,
+                param_name=param,
+                method=req.method or "GET",
+                headers=headers
+            )
+            findings.extend(xss_results)
+
+        return {
+            "status": "SUCCESS",
+            "target_url": req.target_url,
+            "parameter": param,
+            "total_findings": len(findings),
+            "findings": [
+                {
+                    "vuln_type": f.vuln_type,
+                    "endpoint": f.endpoint,
+                    "parameter": f.parameter,
+                    "payload": f.payload,
+                    "severity": f.severity,
+                    "confidence": f.confidence,
+                    "cwe": f.cwe,
+                    "owasp_category": f.owasp_category,
+                    "evidence": f.evidence,
+                    "remediation": f.remediation
+                }
+                for f in findings
+            ]
+        }
+    except Exception as e:
+        logger.error(f"[ActiveExploit Error] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+# =========================================================================
+# MODULE 14: AUTH SESSION & BURP SUITE BRIDGE (core/auth_session_manager.py)
+# =========================================================================
+class BurpExportRequest(BaseModel):
+    base_url: Optional[str] = "https://target.local"
+    scan_id: Optional[str] = None
+    endpoints: Optional[List[Dict[str, Any]]] = None
+
+@app.post("/api/burp/export")
+async def export_burp_sitemap_api(req: BurpExportRequest):
+    """
+    Exports discovered API attack surfaces into standard Burp Suite XML sitemap format.
+    """
+    try:
+        endpoints_to_export = []
+        base_url = req.base_url or "https://target.local"
+        if req.scan_id:
+            scan_data = await db_manager.get_scan(req.scan_id)
+            if scan_data:
+                base_url = scan_data.get("target", base_url)
+                endpoints_to_export = scan_data.get("apis", [])
+        elif req.endpoints:
+            endpoints_to_export = req.endpoints
+
+        bf = BurpSuiteForwarder()
+        xml_content = bf.export_burp_xml_sitemap(base_url, endpoints_to_export)
+        return Response(
+            content=xml_content,
+            media_type="application/xml",
+            headers={"Content-Disposition": "attachment; filename=burp_sitemap.xml"}
+        )
+    except Exception as e:
+        logger.error(f"[BurpExport Error] {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+class BurpProxyCheckRequest(BaseModel):
+    proxy_url: Optional[str] = "http://127.0.0.1:8080"
+
+@app.post("/api/burp/check-proxy")
+async def check_burp_proxy_api(req: BurpProxyCheckRequest):
+    """
+    Checks if Burp Suite proxy listener (127.0.0.1:8080) is reachable.
+    """
+    bf = BurpSuiteForwarder(proxy_url=req.proxy_url or "http://127.0.0.1:8080")
+    online = await bf.check_proxy_online()
+    return {"proxy_url": req.proxy_url, "is_online": online}
+
+
+
 
 
 def launch_desktop_window(url: str = "http://127.0.0.1:8000"):

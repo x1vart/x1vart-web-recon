@@ -3,40 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>x1vart Surface & API Security Audit Platform | Community Edition</title>
-    <!-- Tailwind CSS -->
+    <title>x1vart Surface &amp; API Security Audit Platform | Tactical EASM</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-                tailwind.config = {
+        tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         cyber: {
-                            bg: '#0b0f19',
-                            card: '#111827',
-                            border: '#1f293d',
-                            primary: '#38bdf8', // Sky Blue
-                            accent: '#818cf8',  // Indigo
-                            success: '#34d399', // Emerald
-                            warning: '#fbbf24', // Amber
-                            danger: '#f87171'   // Rose
+                            bg: '#030712',
+                            surface: '#0b0f19',
+                            card: '#0b0f19',
+                            border: '#1e293b',
+                            primary: '#0ea5e9', // Recon Teal / Cyan
+                            accent: '#14b8a6',  // Emerald / Teal
+                            success: '#10b981', // Emerald
+                            warning: '#f59e0b', // Amber
+                            danger: '#f43f5e',  // Rose
+                            purple: '#8b5cf6'   // Purple
                         }
                     },
                     fontFamily: {
-                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace']
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome -->
+    <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Cytoscape.js -->
+    <!-- Cytoscape.js 3.28.1 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
-    <!-- DOMPurify Anti-XSS Sanitation Library -->
+    <!-- DOMPurify 3.0.9 Anti-XSS Sanitizer -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
     <script>
+
         // Global Anti-XSS Sanitizer & escapeHtml Utility
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
@@ -85,133 +89,39 @@
                 }
             });
         })();
+    
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .font-code { font-family: 'JetBrains Mono', monospace; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
         
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #090d16; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        body { font-family: 'Inter', sans-serif; background-color: #030712; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 
-        /* Sidebar and Modern Dark Tabs */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
+
         .tab-btn {
+            position: relative;
             color: #94a3b8;
-            border-left: 3px solid transparent;
-            transition: all 0.15s ease-in-out;
+            border-left: 2px solid transparent;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .tab-btn:hover {
             color: #f1f5f9;
-            background-color: rgba(30, 41, 59, 0.6);
+            background-color: rgba(255, 255, 255, 0.03);
         }
         .tab-btn.active {
-            color: #38bdf8 !important;
-            background-color: rgba(56, 189, 248, 0.08) !important;
-            border-left-color: #38bdf8 !important;
-            font-weight: 600;
+            color: #38bdf8;
+            background-color: rgba(14, 165, 233, 0.08);
+            border-left-color: #0ea5e9;
+            font-weight: 500;
         }
         .tab-btn.active i {
-            color: #38bdf8 !important;
-        }
-        .tab-btn.active span[id^="badge-"] {
-            background-color: rgba(56, 189, 248, 0.15);
-            color: #38bdf8;
-            border-color: rgba(56, 189, 248, 0.3);
+            color: #0ea5e9 !important;
         }
 
-
-        .neon-glow {
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
-        }
-        @keyframes packet-ltr {
-            0% { left: -10%; opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { left: 100%; opacity: 0; }
-        }
-        @keyframes packet-rtl {
-            0% { left: 100%; opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { left: -10%; opacity: 0; }
-        }
-        .packet-forward {
-            animation: packet-ltr 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        .packet-backward {
-            animation: packet-rtl 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        .card-active-cyan {
-            border-color: #06b6d4 !important;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
-        }
-        .card-active-purple {
-            border-color: #a855f7 !important;
-            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
-        }
-        .card-active-emerald {
-            border-color: #10b981 !important;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-        }
-        /* ponytail: Native CSS keyframes & transitions used for zero-runtime overhead; upgrade to Web Animations API if gesture physics required */
-        .tab-content {
-            animation: tabFadeSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes tabFadeSlideIn {
-            0% { opacity: 0; transform: translateY(6px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes modalPop {
-            0% { opacity: 0; transform: scale(0.96) translateY(8px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .modal-content-animated {
-            animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes drawerSlideIn {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(0); }
-        }
-        .drawer-content-animated {
-            animation: drawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes cyberPulseGlow {
-            0%, 100% { box-shadow: 0 0 12px rgba(6, 182, 212, 0.2); }
-            50% { box-shadow: 0 0 24px rgba(6, 182, 212, 0.45); }
-        }
-        .cyber-glow-pulse {
-            animation: cyberPulseGlow 2.5s infinite ease-in-out;
-        }
-        @keyframes beaconPing {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .beacon-live {
-            animation: beaconPing 1.8s infinite ease-in-out;
-        }
-        .stat-card {
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(6, 182, 212, 0.5) !important;
-            box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.18);
-        }
-        tbody tr {
-            transition: background-color 0.15s ease, transform 0.15s ease;
-        }
-        tbody tr:hover {
-            background-color: rgba(30, 41, 59, 0.6) !important;
-        }
-        button, a.tab-btn {
-            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        button:active:not(:disabled) {
-            transform: scale(0.97);
-        }
         @keyframes cyberScanBeam {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(250%); }
@@ -224,167 +134,205 @@
             content: '';
             position: absolute;
             top: 0; left: 0; width: 40%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.25), transparent);
             animation: cyberScanBeam 1.8s infinite linear;
             pointer-events: none;
         }
+
+        #cy {
+            background-color: #050811;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .modal-content-animated, .drawer-content-animated {
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(-8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
     </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-200 min-h-screen flex flex-row antialiased selection:bg-sky-500/30 selection:text-sky-200 overflow-hidden">
+<body class="bg-[#030712] text-zinc-200 min-h-screen flex flex-row antialiased selection:bg-teal-500/20 selection:text-teal-200 overflow-hidden font-sans">
 
-    <!-- LEFT SIDEBAR NAVIGATION -->
-    <aside class="w-64 bg-[#0d1322] border-r border-slate-800/80 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40">
+    <!-- LEFT SIDEBAR NAVIGATION (COMMAND CONSOLE) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#090d16] border-r border-zinc-800/60 flex flex-col h-screen select-none -translate-x-full lg:translate-x-0 lg:static transition-transform duration-200 shrink-0">
         <!-- Logo & Branding -->
-        <div class="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-lg bg-sky-950/80 border border-sky-500/40 flex items-center justify-center text-sky-400 font-bold shadow-sm">
-                    <i class="fa-solid fa-shield-halved text-sm"></i>
+        <div class="px-4 py-3.5 border-b border-zinc-800/60 flex items-center justify-between bg-[#060a12]">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-teal-950/80 border border-teal-500/40 flex items-center justify-center text-teal-400 font-semibold shadow-sm">
+                    <i class="fa-solid fa-shield-halved text-xs"></i>
                 </div>
                 <div>
-                    <div class="font-extrabold text-sm tracking-wider text-white">x1vart <span class="text-sky-400 font-mono text-xs">EASM</span></div>
-                    <div class="text-[10px] text-slate-400 font-mono">OWASP API Audit Suite</div>
+                    <div class="font-semibold text-xs tracking-tight text-zinc-100 flex items-center space-x-1.5">
+                        <span>x1vart</span>
+                        <span class="text-[10px] font-mono font-medium text-teal-400 bg-teal-950/60 px-1 py-0.2 rounded border border-teal-800/50">EASM</span>
+                    </div>
+                    <div class="text-[10px] text-zinc-500 font-mono">SecOps Console</div>
                 </div>
             </div>
-            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">v2.2</span>
+            <div class="flex items-center space-x-2">
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-800 font-medium">v2.2</span>
+                <button id="btn-close-sidebar" onclick="document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebar-backdrop').classList.add('hidden');" class="lg:hidden text-zinc-400 hover:text-white p-1" title="Đóng Menu">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- Navigation Menu (Scrollable) -->
-        <div class="flex-1 overflow-y-auto px-3 py-4 space-y-5 text-xs">
-            <!-- Group 1: BỀ MẶT TẤN CÔNG -->
+        <!-- Navigation Menu -->
+        <div class="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 text-xs">
+            <!-- Group 1: HỆ THỐNG TOÀN CẢNH -->
             <div>
-                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                    <span>Bề Mặt Tấn Công</span>
-                    <i class="fa-solid fa-globe text-[10px] text-slate-600"></i>
-                </div>
+                <span class="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1.5 px-2.5 block">Hệ Thống Toàn Cảnh</span>
                 <div class="space-y-0.5">
-                    <button class="tab-btn active w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-subdomains">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-network-wired text-sky-400 w-4 text-center"></i>
-                            <span class="truncate">Hạ Tầng & Subdomains</span>
+                    <button class="tab-btn active w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-subdomains">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-network-wired text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Hạ Tầng & Subdomains</span>
                         </span>
-                        <span id="badge-sub-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-sub-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-vulns">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-shield-virus text-rose-400 w-4 text-center"></i>
-                            <span class="truncate">Lỗ Hổng & Cổng Dịch Vụ</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-vulns">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-shield-virus text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Lỗ Hổng & Cổng Dịch Vụ</span>
                         </span>
-                        <span id="badge-vuln-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-vuln-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-osint">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-file-shield text-blue-400 w-4 text-center"></i>
-                            <span class="truncate">OSINT & Tài Liệu</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-osint">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-file-shield text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">OSINT & Network Whois</span>
                         </span>
-                        <span id="badge-docs-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-docs-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-scope">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-bullseye text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Phạm Vi & Scope Guard</span>
+                        </span>
+                        <span class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">M11</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Group 2: MÃ NGUỒN & API -->
+            <!-- Group 2: MÃ NGUỒN & KHAI THÁC -->
             <div>
-                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                    <span>Mã Nguồn & API</span>
-                    <i class="fa-solid fa-code text-[10px] text-slate-600"></i>
-                </div>
+                <span class="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1.5 px-2.5 block">Mã Nguồn & Khai Thác</span>
                 <div class="space-y-0.5">
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-apis">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-terminal text-emerald-400 w-4 text-center"></i>
-                            <span class="truncate">Điểm Cuối API & BOLA</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-apis">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-satellite text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Điểm Cuối API & BOLA</span>
                         </span>
-                        <span id="badge-api-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-api-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-secrets">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-key text-rose-400 w-4 text-center"></i>
-                            <span class="truncate">Khóa Bí Mật (Secrets)</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-secrets">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-key text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Khóa Bí Mật (Secrets)</span>
                         </span>
-                        <span id="badge-sec-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-sec-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-sourcemaps">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-folder-tree text-amber-400 w-4 text-center"></i>
-                            <span class="truncate">Source Map Mini IDE</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-sourcemaps">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-folder-tree text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Source Map Mini IDE</span>
                         </span>
-                        <span id="badge-maps-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-maps-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-spa">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-spider text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Dynamic SPA Crawler</span>
+                        </span>
+                        <span class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">M12</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-bola">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-user-shield text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Kiểm Thử BOLA 2 Token</span>
+                        </span>
+                        <span class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">M13</span>
+                    </button>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-burp">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-plug-circle-bolt text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Cầu Nối Burp Suite & Auth</span>
+                        </span>
+                        <span class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">M14</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Group 3: MÔ HÌNH ĐE DỌA -->
+            <!-- Group 3: MÔ HÌNH NGUY CƠ -->
             <div>
-                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                    <span>Mô Hình Đe Dọa</span>
-                    <i class="fa-solid fa-chart-pie text-[10px] text-slate-600"></i>
-                </div>
+                <span class="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1.5 px-2.5 block">Mô Hình Nguy Cơ</span>
                 <div class="space-y-0.5">
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-owasp">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-bullseye text-sky-400 w-4 text-center"></i>
-                            <span class="truncate">OWASP API Top 10</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-owasp">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-chart-pie text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">OWASP API Top 10</span>
                         </span>
-                        <span id="badge-owasp-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-owasp-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Group 4: VẬN HÀNH & LOGS -->
+            <!-- Group 4: HÀNH TRÌNH & GIÁM SÁT -->
             <div>
-                <div class="px-3 pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                    <span>Vận Hành & Logs</span>
-                    <i class="fa-solid fa-sliders text-[10px] text-slate-600"></i>
-                </div>
+                <span class="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1.5 px-2.5 block">Hành Trình & Giám Sát</span>
                 <div class="space-y-0.5">
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-kali-terminal">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-terminal text-purple-400 w-4 text-center"></i>
-                            <span class="truncate">Nhật Ký Dual-Node Kali</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-kali-terminal">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-terminal text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Nhật Ký Dual-Node Kali</span>
                         </span>
-                        <span id="badge-cli-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-cli-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-history">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-clock-rotate-left text-orange-400 w-4 text-center"></i>
-                            <span class="truncate">Lịch Sử & Delta Diff</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-history">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-clock-rotate-left text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Lịch Sử & Delta Diff</span>
                         </span>
-                        <span id="badge-history-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-history-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
-                    <button class="tab-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition" data-target="tab-easm">
-                        <span class="flex items-center space-x-2.5 truncate">
-                            <i class="fa-solid fa-satellite-dish text-indigo-400 w-4 text-center"></i>
-                            <span class="truncate">Giám Sát EASM & Alert</span>
+                    <button class="tab-btn w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-left transition hover:text-teal-400 hover:bg-zinc-900/50" data-target="tab-easm">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i class="fa-solid fa-satellite-dish text-zinc-400 w-4 text-center text-xs"></i>
+                            <span class="truncate text-xs">Giám Sát EASM & Alert</span>
                         </span>
-                        <span id="badge-sched-count" class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">0</span>
+                        <span id="badge-sched-count" class="bg-zinc-800 text-zinc-400 font-mono text-[10px] px-1.5 py-0.2 rounded-full border border-zinc-700/50">0</span>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Bottom Kali Node Status Footer -->
-        <div class="p-3 border-t border-slate-800/80 bg-slate-900/60">
+        <div class="p-3 border-t border-zinc-800/60 bg-[#060a12]/90">
             <div class="flex items-center justify-between mb-1.5">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-brands fa-linux text-purple-400 text-sm"></i>
-                    <span class="text-[11px] font-bold text-slate-200">Kali SSH Node</span>
+                <div class="flex items-center space-x-1.5">
+                    <i class="fa-brands fa-linux text-zinc-400 text-xs"></i>
+                    <span class="text-[11px] font-medium text-zinc-300">Kali SSH Node</span>
                 </div>
-                <span id="kali-status-badge" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 flex items-center space-x-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500 inline-block"></span>
-                    <span>CHƯA CHECK</span>
+                <span id="kali-status-badge" class="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-800 flex items-center space-x-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                    <span class="text-zinc-300">STANDBY</span>
                 </span>
             </div>
-            <div class="text-[10px] font-mono text-slate-400 truncate mb-2">
+            <div class="text-[10px] font-mono text-zinc-400 truncate mb-2 bg-zinc-950/70 px-2 py-1 rounded border border-zinc-800/50">
                 <span id="kali-display-host">Chưa kết nối (Cục bộ)</span>
             </div>
-            <div class="flex items-center space-x-1.5">
-                <button id="btn-ping-kali" class="flex-1 py-1 bg-purple-950/80 hover:bg-purple-900 text-purple-200 text-[10px] font-semibold rounded border border-purple-700/60 transition flex items-center justify-center space-x-1">
-                    <i class="fa-solid fa-satellite-dish"></i>
+            <div class="flex items-center space-x-1">
+                <button id="btn-ping-kali" class="flex-1 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-[10px] font-medium rounded border border-zinc-700/60 transition flex items-center justify-center space-x-1.5 active:scale-[0.98]">
+                    <i class="fa-solid fa-satellite-dish text-[10px] text-teal-400"></i>
                     <span>Test SSH</span>
                 </button>
-                <button onclick="openSshConfigModal()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] rounded border border-slate-700 transition" title="Cài đặt SSH">
+                <button onclick="openSshConfigModal()" class="px-2 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-[10px] rounded border border-zinc-800 transition" title="Cài đặt SSH">
                     <i class="fa-solid fa-gear"></i>
                 </button>
-                <button onclick="openSshGuideModal()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 text-[10px] rounded border border-slate-700 transition" title="Hướng dẫn kết nối Kali">
+                <button onclick="openSshGuideModal()" class="px-2 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-300 text-[10px] rounded border border-zinc-800 transition" title="Hướng dẫn kết nối Kali">
                     <i class="fa-solid fa-book-open"></i>
                 </button>
             </div>
@@ -402,99 +350,106 @@
         </div>
     </aside>
 
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-backdrop" onclick="document.getElementById('sidebar').classList.add('-translate-x-full'); this.classList.add('hidden');" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 lg:hidden hidden"></div>
+
     <!-- RIGHT MAIN CONTENT WRAPPER -->
-    <div class="flex-1 min-w-0 flex flex-col bg-[#0b0f19] h-screen overflow-y-auto">
-        <!-- TOP STICKY HEADER -->
-        <header class="sticky top-0 z-30 bg-[#0d1322]/95 backdrop-blur border-b border-slate-800/80 px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-md">
-            <!-- Target Input & Scan Button -->
-            <div class="flex-1 min-w-[320px] max-w-2xl flex items-center space-x-2">
+    <div class="flex-1 min-w-0 flex flex-col bg-[#070a12] h-screen overflow-y-auto">
+        <!-- TOP STICKY RECON HUD -->
+        <header class="sticky top-0 z-30 bg-[#090d16]/90 backdrop-blur-md border-b border-zinc-800/60 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-sm">
+            <!-- Mobile Hamburger Toggle -->
+            <button id="btn-toggle-sidebar" onclick="document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebar-backdrop').classList.toggle('hidden');" class="lg:hidden p-2 text-zinc-400 hover:text-white rounded-lg border border-zinc-800/80 bg-zinc-950 shrink-0" title="Mở danh mục điều khiển">
+                <i class="fa-solid fa-bars text-xs"></i>
+            </button>
+
+            <!-- Target Command Bar -->
+            <div class="flex-1 min-w-[140px] max-w-2xl flex items-center space-x-1.5 sm:space-x-2">
                 <div class="relative flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                        <i class="fa-solid fa-globe text-xs"></i>
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-500">
+                        <i class="fa-solid fa-crosshairs text-xs"></i>
                     </div>
-                    <input id="target-input" type="text" value="" 
-                           placeholder="Nhập tên miền hoặc URL mục tiêu (vd: target.edu.vn, https://example.com)..."
-                           class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700/80 rounded-lg text-xs font-mono text-sky-300 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition shadow-inner">
+                    <input id="target-input" type="text" value=""
+                           placeholder="Nhập tên miền hoặc URL mục tiêu (vd: target.edu.vn)..."
+                           class="w-full pl-8 pr-3 py-1.5 bg-[#050811] border border-zinc-800 rounded-lg text-xs font-mono text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-teal-500/80 focus:ring-1 focus:ring-teal-500/20 transition">
                 </div>
 
-                <button id="btn-start-scan" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-lg text-xs flex items-center space-x-1.5 shadow transition cursor-pointer shrink-0">
-                    <i class="fa-solid fa-magnifying-glass-chart"></i>
-                    <span>TRINH SÁT</span>
+                <button id="btn-start-scan" class="px-2.5 sm:px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-medium rounded-lg text-xs flex items-center space-x-1.5 transition-all active:scale-[0.98] shrink-0 cursor-pointer shadow-sm">
+                    <i class="fa-solid fa-bolt text-xs"></i>
+                    <span class="hidden sm:inline">Khởi chạy Trinh sát</span>
+                    <span class="sm:hidden font-mono">Quét</span>
                 </button>
 
-                <!-- Quick Demo Button -->
-                <button onclick="setDemoTarget()" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs font-mono transition shrink-0" title="Thử nghiệm nhanh mục tiêu mẫu">
-                    <i class="fa-solid fa-flask text-amber-400"></i>
+                <!-- Quick Demo Target Button -->
+                <button onclick="setDemoTarget()" class="px-2.5 py-1.5 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800/80 rounded-lg text-xs font-mono transition shrink-0" title="Thử nghiệm nhanh mục tiêu mẫu">
+                    <i class="fa-solid fa-flask text-zinc-400"></i>
                     <span class="hidden sm:inline ml-1">Demo</span>
                 </button>
             </div>
 
-            <!-- Header Quick Actions -->
+            <!-- Header Action Controls -->
             <div class="flex items-center space-x-2">
-                <button onclick="openCommandPalette()" class="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-2 transition shadow-inner">
-                    <i class="fa-solid fa-terminal text-sky-400"></i>
-                    <span class="hidden md:inline">Lệnh nhanh</span>
-                    <kbd class="px-1.5 py-0.5 text-[10px] bg-slate-950 rounded border border-slate-700 text-sky-400 font-mono font-bold">Ctrl K</kbd>
+                <button onclick="openCommandPalette()" class="text-xs bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 px-2.5 py-1.5 rounded-lg border border-zinc-800/80 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-terminal text-zinc-400 text-xs"></i>
+                    <span class="hidden md:inline text-xs">Lệnh nhanh</span>
+                    <kbd class="px-1 py-0.2 text-[9px] bg-zinc-950 rounded border border-zinc-800 text-zinc-400 font-mono">⌘K</kbd>
                 </button>
-                <button onclick="openHistoryModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
-                    <i class="fa-solid fa-clock-rotate-left text-xs text-sky-400"></i>
-                    <span class="hidden lg:inline">Lịch sử</span>
+                <button onclick="openHistoryModal()" class="text-xs bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 px-2.5 py-1.5 rounded-lg border border-zinc-800/80 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-xs text-zinc-400"></i>
+                    <span class="hidden lg:inline text-xs">Lịch sử</span>
                 </button>
-                <a href="/api/report/export" target="_blank" id="btn-header-report" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-1.5 transition">
-                    <i class="fa-solid fa-file-invoice text-xs text-sky-400"></i>
-                    <span class="hidden lg:inline">Báo cáo</span>
+                <a href="/api/report/export" target="_blank" id="btn-header-report" class="text-xs bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 px-2.5 py-1.5 rounded-lg border border-zinc-800/80 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-file-invoice text-xs text-zinc-400"></i>
+                    <span class="hidden lg:inline text-xs">Báo cáo</span>
                 </a>
             </div>
         </header>
 
-        <!-- SUB-HEADER: Scan Options & Status Bar -->
-        <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 border-b border-slate-800/80 px-6 py-2 bg-slate-900/40">
-            <div class="flex flex-wrap items-center gap-3 text-[11px]">
-                <!-- Scan Profiles Selector -->
-                <div class="flex items-center space-x-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 mr-2 shadow-inner">
-                    <span class="text-slate-500 font-mono text-[10px] uppercase font-bold">Chế độ:</span>
-                    <label class="flex items-center space-x-1 cursor-pointer text-cyan-300 font-semibold" title="Quét nhanh 2-3 phút: Nmap -F, WhatWeb, Nikto 15s">
-                        <input id="scan-profile-fast" type="radio" name="scan-profile" value="fast" checked class="text-cyan-500 bg-slate-900 focus:ring-0">
-                        <span>⚡ Fast Recon</span>
+        <!-- SUB-HEADER TELEMETRY & MODULE OPTIONS -->
+        <div class="flex flex-wrap items-center justify-between text-xs text-zinc-400 border-b border-zinc-800/60 px-5 py-2 bg-[#060a12]/90 backdrop-blur-sm">
+            <div class="flex flex-wrap items-center gap-2 text-[11px]">
+                <!-- Profile Switcher (Pill style) -->
+                <div class="inline-flex items-center bg-zinc-950 p-0.5 rounded-md border border-zinc-800 mr-1.5">
+                    <label class="flex items-center space-x-1 px-2 py-0.5 rounded cursor-pointer text-zinc-300 has-[:checked]:bg-zinc-800 has-[:checked]:text-teal-300 transition" title="Quét nhanh 2-3 phút">
+                        <input id="scan-profile-fast" type="radio" name="scan-profile" value="fast" checked class="hidden">
+                        <span class="font-mono text-[10px]">⚡ Fast</span>
                     </label>
-                    <span class="text-slate-700">|</span>
-                    <label class="flex items-center space-x-1 cursor-pointer text-purple-300 font-semibold" title="Chuyên sâu thực chiến Red Team: Nmap NSE (http-title, ssl-enum-ciphers, http-methods), ffuf Fuzzing, sslscan, wafw00f">
-                        <input id="scan-profile-deep" type="radio" name="scan-profile" value="deep" class="text-purple-500 bg-slate-900 focus:ring-0">
-                        <span>🔥 Deep Pentest</span>
+                    <label class="flex items-center space-x-1 px-2 py-0.5 rounded cursor-pointer text-zinc-300 has-[:checked]:bg-zinc-800 has-[:checked]:text-rose-300 transition" title="Chuyên sâu Red Team">
+                        <input id="scan-profile-deep" type="radio" name="scan-profile" value="deep" class="hidden">
+                        <span class="font-mono text-[10px]">🔥 Deep</span>
                     </label>
                 </div>
-                <span class="text-slate-500 font-mono"><i class="fa-solid fa-sliders mr-1 text-sky-400"></i>Tùy chọn:</span>
-                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
-                    <input id="chk-subdomain" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
-                    <span>Subdomain & Takeover</span>
+                <span class="text-zinc-600">|</span>
+                <label class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded border border-zinc-800/80 bg-zinc-900/40 cursor-pointer text-zinc-400 hover:text-zinc-200 transition">
+                    <input id="chk-subdomain" type="checkbox" checked class="w-3 h-3 rounded border-zinc-700 bg-zinc-950 text-teal-600 focus:ring-0">
+                    <span class="text-[11px]">Subdomain</span>
                 </label>
-                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
-                    <input id="chk-js" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
-                    <span>JS AST & BOLA</span>
+                <label class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded border border-zinc-800/80 bg-zinc-900/40 cursor-pointer text-zinc-400 hover:text-zinc-200 transition">
+                    <input id="chk-js" type="checkbox" checked class="w-3 h-3 rounded border-zinc-700 bg-zinc-950 text-teal-600 focus:ring-0">
+                    <span class="text-[11px]">JS & BOLA</span>
                 </label>
-                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
-                    <input id="chk-sourcemap" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
-                    <span>Source Map (.js.map)</span>
+                <label class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded border border-zinc-800/80 bg-zinc-900/40 cursor-pointer text-zinc-400 hover:text-zinc-200 transition">
+                    <input id="chk-sourcemap" type="checkbox" checked class="w-3 h-3 rounded border-zinc-700 bg-zinc-950 text-teal-600 focus:ring-0">
+                    <span class="text-[11px]">Source Map</span>
                 </label>
-                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
-                    <input id="chk-secrets" type="checkbox" checked class="rounded border-slate-700 text-sky-500 bg-slate-900">
-                    <span>Shannon Secrets (H&ge;3.0)</span>
+                <label class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded border border-zinc-800/80 bg-zinc-900/40 cursor-pointer text-zinc-400 hover:text-zinc-200 transition">
+                    <input id="chk-secrets" type="checkbox" checked class="w-3 h-3 rounded border-zinc-700 bg-zinc-950 text-teal-600 focus:ring-0">
+                    <span class="text-[11px]">Entropy Secrets</span>
                 </label>
-                <label class="flex items-center space-x-1.5 cursor-pointer hover:text-slate-200">
-                    <input id="chk-vuln" type="checkbox" checked class="rounded border-slate-700 text-rose-500 bg-slate-900">
-                    <span class="text-rose-300">File & Port Vulns</span>
+                <label class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded border border-zinc-800/80 bg-zinc-900/40 cursor-pointer text-zinc-400 hover:text-zinc-200 transition">
+                    <input id="chk-vuln" type="checkbox" checked class="w-3 h-3 rounded border-zinc-700 bg-zinc-950 text-rose-600 focus:ring-0">
+                    <span class="text-[11px]">Vulns & Ports</span>
                 </label>
             </div>
-            <div class="flex items-center space-x-2 text-[11px] font-mono">
-                <span class="text-slate-500">Trạng thái:</span>
-                <span id="scan-status-text" class="text-slate-400">Sẵn sàng (Nhấn Trinh sát)</span>
+            <div class="flex items-center space-x-2 text-[11px] font-mono mt-1 sm:mt-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-zinc-500">Trạng thái:</span>
+                <span id="scan-status-text" class="text-zinc-300 font-medium">Sẵn sàng</span>
             </div>
         </div>
 
         <!-- MAIN SCROLLABLE CONTENT AREA -->
         <main class="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto">
-<!-- Live Scan Progress Bar (Active during background execution) -->
-        <div id="scan-progress-container" class="hidden bg-slate-900 border border-cyan-800/40 rounded-xl p-3.5 space-y-2 shadow-lg cyber-scanner-active">
+<div id="scan-progress-container" class="hidden bg-slate-900 border border-cyan-800/40 rounded-xl p-3.5 space-y-2 shadow-lg cyber-scanner-active">
             <div class="flex items-center justify-between text-xs font-mono">
                 <span id="scan-progress-stage" class="text-cyan-400 flex items-center space-x-2">
                     <i class="fa-solid fa-spinner fa-spin text-cyan-400"></i>
@@ -507,236 +462,291 @@
             </div>
         </div>
 
-                <!-- Risk Exposure Scorecard & Quick Action Bar -->
-        <div class="bg-gradient-to-r from-slate-900 via-slate-900/95 to-slate-900 border border-cyber-border rounded-xl p-5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 overflow-hidden">
-            <div class="flex items-center space-x-5 min-w-0">
-                <!-- Grade Badge -->
-                <div id="grade-badge" class="w-20 h-20 rounded-2xl bg-slate-800 border border-slate-700 flex flex-col items-center justify-center font-bold shadow-inner shrink-0">
-                    <span id="stat-grade" class="text-3xl text-cyan-400 font-extrabold">-</span>
-                    <span class="text-[9px] uppercase tracking-wider text-slate-400">XẾP LOẠI</span>
-                </div>
-                <div class="min-w-0">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <h2 class="text-lg font-bold text-white truncate">Bề Mặt Rủi Ro & Đánh Giá An Ninh</h2>
-                        <span id="stat-risk-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0">CHƯA QUÉT</span>
+        <!-- TACTICAL MISSION BRIEFING (MINIMALIST READY STATE HERO) -->
+        <div id="mission-briefing-card" class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 sm:p-5 shadow-sm relative overflow-hidden backdrop-blur transition-all">
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="space-y-2 max-w-3xl">
+                    <div class="flex items-center space-x-2 text-xs font-mono text-teal-400">
+                        <span class="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
+                        <span class="font-medium tracking-wide uppercase text-[10px]">Tác Chiến Phòng Thủ • Attack Surface & API Security Audit</span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-1">
-                        Điểm phơi nhiễm bề mặt: <b id="stat-score-text" class="text-cyan-400 text-sm">--/100</b>
-                        (Đánh giá toàn diện dựa trên OWASP API Security Top 10:2023)
+                    <h2 class="text-base sm:text-lg font-semibold text-zinc-100 tracking-tight">Trung Tâm Chỉ Huy Trinh Sát & Kiểm Toán An Ninh</h2>
+                    <p class="text-xs text-zinc-400 leading-relaxed">
+                        Quy trình EASM tự động: Thu thập Subdomain, phân tích cú pháp AST JS tìm lỗ hổng BOLA/IDOR, quét Shannon Entropy bí mật API, tái tạo Source Map và phối hợp máy ảo Kali Linux agentless.
                     </p>
+                    <div class="pt-1 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="text-zinc-500 text-[11px] font-mono mr-1">Thử nghiệm nhanh:</span>
+                        <button onclick="setDemoTarget(); document.getElementById('btn-start-scan').click();" class="px-2.5 py-1 bg-zinc-900/60 hover:bg-zinc-800 text-teal-300 rounded border border-zinc-800 text-xs font-mono transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-graduation-cap text-teal-400 text-xs"></i>
+                            <span>target.edu.vn</span>
+                        </button>
+                        <button onclick="document.getElementById('target-input').value='demo.testfire.net'; document.getElementById('scan-profile-deep').checked=true; document.getElementById('btn-start-scan').click();" class="px-2.5 py-1 bg-zinc-900/60 hover:bg-zinc-800 text-rose-300 rounded border border-zinc-800 text-xs font-mono transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-fire-flame-curved text-rose-400 text-xs"></i>
+                            <span>demo.testfire.net</span>
+                        </button>
+                        <button onclick="document.getElementById('target-input').value='juice-shop.herokuapp.com'; document.getElementById('btn-start-scan').click();" class="px-2.5 py-1 bg-zinc-900/60 hover:bg-zinc-800 text-amber-300 rounded border border-zinc-800 text-xs font-mono transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-shield-halved text-amber-400 text-xs"></i>
+                            <span>OWASP JuiceShop</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Export Buttons -->
-            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full xl:w-auto shrink-0 justify-start xl:justify-end">
-                <a id="btn-export-report" href="/api/report/export" target="_blank" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold rounded-lg text-xs flex items-center justify-center space-x-2 shadow-lg transition whitespace-nowrap">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Xuất Báo Cáo Thẩm Định (HTML/PDF)</span>
-                </a>
-                <a id="btn-export-openapi" href="/api/openapi/download" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold rounded-lg border border-cyan-500/40 text-xs flex items-center justify-center space-x-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-download"></i>
-                    <span>Xuất Chuẩn OpenAPI 3.0 (Swagger/Postman)</span>
-                </a>
+                <div class="bg-zinc-950/70 border border-zinc-800/80 rounded-lg p-3 min-w-[220px] space-y-2 font-mono text-xs shadow-inner">
+                    <div class="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold flex items-center justify-between">
+                        <span>Kiến Trúc Dual-Node</span>
+                        <i class="fa-solid fa-network-wired text-teal-400 text-[10px]"></i>
+                    </div>
+                    <div class="flex items-center justify-between text-zinc-300">
+                        <span class="flex items-center space-x-1.5">
+                            <i class="fa-brands fa-windows text-zinc-400"></i>
+                            <span>Master Engine</span>
+                        </span>
+                        <span class="text-emerald-400 font-semibold text-[10px]">ONLINE</span>
+                    </div>
+                    <div class="flex items-center justify-between text-zinc-300">
+                        <span class="flex items-center space-x-1.5">
+                            <i class="fa-brands fa-linux text-zinc-400"></i>
+                            <span>Kali SSH Node</span>
+                        </span>
+                        <span class="text-teal-300 font-semibold text-[10px]">AGENTLESS</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 5 Summary KPI Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Card 1: Subdomains & Takeover -->
-            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 flex items-center justify-between stat-card">
-                <div>
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tên Miền Phụ</div>
-                    <div id="stat-subdomains" class="text-2xl font-bold text-cyan-400 mt-1">0</div>
-                    <div id="stat-subdomains-sub" class="text-[11px] text-cyan-300 mt-1 font-mono">0 Rủi ro Takeover</div>
+        <!-- BENTO HERO: RISK EXPOSURE & TELEMETRY KPI METRICS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3.5">
+            <!-- Bento Card 1: Risk & Security Exposure (Spans 2 columns on lg) -->
+            <div class="lg:col-span-2 bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Đánh Giá An Ninh & Rủi Ro</span>
+                    <span id="stat-risk-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">CHƯA QUÉT</span>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl">
-                    <i class="fa-solid fa-sitemap"></i>
+                
+                <div class="my-3 flex items-baseline space-x-3">
+                    <div id="grade-badge" class="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0">
+                        <span id="stat-grade" class="text-xl font-bold text-emerald-400 font-mono">-</span>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-zinc-500">Điểm phơi nhiễm bề mặt</div>
+                        <div id="stat-score-text" class="font-mono text-3xl font-bold text-emerald-400 tabular-nums">--/100</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 pt-2 border-t border-zinc-800/50">
+                    <a id="btn-export-report" href="/api/report/export" target="_blank" class="flex-1 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-[10px] font-medium rounded border border-zinc-800 transition flex items-center justify-center space-x-1" title="Xuất báo cáo HTML/PDF">
+                        <i class="fa-solid fa-file-pdf text-teal-400"></i>
+                        <span>Báo cáo</span>
+                    </a>
+                    <a id="btn-export-ptes-json" href="/api/report/json" target="_blank" class="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-300 text-[10px] font-mono rounded border border-zinc-800 transition" title="Báo cáo PTES JSON">
+                        <span>PTES</span>
+                    </a>
+                    <a id="btn-export-openapi" href="/api/openapi/download" class="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-teal-300 text-[10px] font-mono rounded border border-zinc-800 transition" title="Xuất OpenAPI 3.0">
+                        <span>OpenAPI</span>
+                    </a>
                 </div>
             </div>
 
-            <!-- Card 2: Hidden APIs & BOLA -->
-            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 flex items-center justify-between stat-card">
-                <div>
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Điểm Cuối API Ẩn</div>
-                    <div id="stat-endpoints" class="text-2xl font-bold text-emerald-400 mt-1">0</div>
-                    <div id="stat-endpoints-sub" class="text-[11px] text-emerald-300 mt-1 font-mono">0 Mục tiêu BOLA</div>
+            <!-- Bento Card 2: Subdomains -->
+            <div class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 flex flex-col justify-between shadow-sm transition hover:border-zinc-700/60">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Subdomains</span>
+                    <i class="fa-solid fa-sitemap text-zinc-600 text-xs"></i>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
-                    <i class="fa-solid fa-code"></i>
+                <div class="my-2">
+                    <div id="stat-subdomains" class="font-mono text-2xl font-semibold text-zinc-100 tabular-nums">0</div>
                 </div>
+                <div id="stat-subdomains-sub" class="text-[11px] text-zinc-500 font-mono truncate">0 Rủi ro Takeover</div>
             </div>
 
-            <!-- Card 3: High-Entropy Secrets -->
-            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 flex items-center justify-between stat-card">
-                <div>
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Khóa Bí Mật Rò Rỉ</div>
-                    <div id="stat-secrets" class="text-2xl font-bold text-rose-400 mt-1">0</div>
-                    <div id="stat-secrets-sub" class="text-[11px] text-rose-300 mt-1 font-mono">H(X) &ge; 3.0 Đạt chuẩn</div>
+            <!-- Bento Card 3: Hidden APIs -->
+            <div class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 flex flex-col justify-between shadow-sm transition hover:border-zinc-700/60">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Active APIs</span>
+                    <i class="fa-solid fa-code text-zinc-600 text-xs"></i>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-rose-950/60 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl">
-                    <i class="fa-solid fa-key"></i>
+                <div class="my-2">
+                    <div id="stat-endpoints" class="font-mono text-2xl font-semibold text-zinc-100 tabular-nums">0</div>
                 </div>
+                <div id="stat-endpoints-sub" class="text-[11px] text-zinc-500 font-mono truncate">0 Mục tiêu BOLA</div>
             </div>
 
-            <!-- Card 4: Active Vulns & Exposed Files -->
-            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 flex items-center justify-between stat-card">
-                <div>
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Lỗ Hổng Hoạt Động</div>
-                    <div id="stat-vulns" class="text-2xl font-bold text-amber-400 mt-1">0</div>
-                    <div id="stat-vulns-sub" class="text-[11px] text-amber-300 mt-1 font-mono">0 Tệp | Cổng OK</div>
+            <!-- Bento Card 4: Leaked Secrets -->
+            <div class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 flex flex-col justify-between shadow-sm transition hover:border-zinc-700/60">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Secrets</span>
+                    <i class="fa-solid fa-key text-zinc-600 text-xs"></i>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-amber-950/60 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl">
-                    <i class="fa-solid fa-shield-virus"></i>
+                <div class="my-2">
+                    <div id="stat-secrets" class="font-mono text-2xl font-semibold text-zinc-100 tabular-nums">0</div>
                 </div>
+                <div id="stat-secrets-sub" class="text-[11px] text-zinc-500 font-mono truncate">H(X) &ge; 3.0 Đạt chuẩn</div>
             </div>
 
-            <!-- Card 5: Source Maps & Headers -->
-            <div class="bg-cyber-card border border-cyber-border rounded-xl p-4 flex items-center justify-between stat-card">
-                <div>
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Bản Đồ & Tiêu Đề</div>
-                    <div id="stat-sourcemaps" class="text-2xl font-bold text-purple-400 mt-1">0</div>
-                    <div id="stat-sourcemaps-sub" class="text-[11px] text-purple-300 mt-1 font-mono">0 Tiêu đề thiếu</div>
+            <!-- Bento Card 5: Active Vulns & Ports -->
+            <div class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 flex flex-col justify-between shadow-sm transition hover:border-zinc-700/60">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Vulns & Ports</span>
+                    <i class="fa-solid fa-shield-virus text-zinc-600 text-xs"></i>
                 </div>
-                <div class="w-12 h-12 rounded-lg bg-purple-950/60 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl">
-                    <i class="fa-solid fa-folder-tree"></i>
+                <div class="my-2">
+                    <div id="stat-vulns" class="font-mono text-2xl font-semibold text-zinc-100 tabular-nums">0</div>
                 </div>
+                <div id="stat-vulns-sub" class="text-[11px] text-zinc-500 font-mono truncate">0 Tệp | Cổng OK</div>
+            </div>
+
+            <!-- Bento Card 6: Source Maps -->
+            <div class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl p-4 flex flex-col justify-between shadow-sm transition hover:border-zinc-700/60">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium text-zinc-400 uppercase tracking-wider">Source Maps</span>
+                    <i class="fa-solid fa-folder-tree text-zinc-600 text-xs"></i>
+                </div>
+                <div class="my-2">
+                    <div id="stat-sourcemaps" class="font-mono text-2xl font-semibold text-zinc-100 tabular-nums">0</div>
+                </div>
+                <div id="stat-sourcemaps-sub" class="text-[11px] text-zinc-500 font-mono truncate">0 Tiêu đề thiếu</div>
             </div>
         </div>
 
         <!-- Attack Surface Interactive Graph -->
-        <div id="graph-panel-wrapper" class="bg-cyber-card border border-cyber-border rounded-xl overflow-hidden shadow-2xl transition-all">
+        <div id="graph-panel-wrapper" class="bg-[#0b0f19]/80 border border-zinc-800/60 rounded-xl overflow-hidden shadow-sm transition-all">
             <!-- Graph Toolbar -->
-            <div class="px-5 py-3 border-b border-cyber-border flex flex-wrap items-center justify-between gap-3 bg-slate-900/80">
+            <div class="px-4 py-2.5 border-b border-zinc-800/60 flex flex-wrap items-center justify-between gap-2.5 bg-[#080d17]/80">
                 <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-diagram-project text-cyan-400"></i>
-                    <span class="font-semibold text-sm text-white">Đồ Thị Bề Mặt Tấn Công Tương Tác</span>
-                    <span class="text-xs text-slate-500 font-mono">(Cytoscape Network Engine)</span>
+                    <i class="fa-solid fa-diagram-project text-teal-400 text-xs"></i>
+                    <span class="font-medium text-xs text-zinc-200">Đồ Thị Bề Mặt Tấn Công Tương Tác</span>
+                    <span class="text-[11px] text-zinc-500 font-mono hidden sm:inline">(Cytoscape Engine)</span>
                 </div>
 
                 <!-- Graph Layout Switchers & View Controls -->
                 <div class="flex flex-wrap items-center gap-1.5 text-xs">
-                    <span class="text-slate-500 font-mono text-[11px] mr-1 hidden sm:inline">Bố cục:</span>
-                    <button id="btn-layout-tree" class="px-2.5 py-1 bg-cyan-950/90 text-cyan-300 rounded border border-cyan-600/80 font-mono font-semibold transition flex items-center space-x-1.5 hover:bg-cyan-900" title="Bố cục Cây Phân Cấp có trật tự từ Root -> Subdomain -> JS -> APIs (Dễ nhìn nhất!)">
-                        <i class="fa-solid fa-sitemap text-cyan-400"></i>
-                        <span>🌳 Cây Phân Cấp (Tree)</span>
+                    <button id="btn-layout-tree" class="px-2.5 py-1 bg-teal-950/70 text-teal-300 rounded border border-teal-700/60 text-xs font-mono font-medium transition flex items-center space-x-1.5 hover:bg-teal-900/50" title="Bố cục Cây Phân Cấp có trật tự">
+                        <i class="fa-solid fa-sitemap text-teal-400 text-xs"></i>
+                        <span>Cây Phân Cấp</span>
                     </button>
-                    <button id="btn-layout-radar" class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded border border-slate-700 font-mono transition flex items-center space-x-1.5 hover:bg-slate-700" title="Bố cục Vòng Quỹ Đạo Radar tập trung theo cấp bậc">
-                        <i class="fa-solid fa-bullseye text-amber-400"></i>
-                        <span>🎯 Quỹ Đạo (Radar)</span>
+                    <button id="btn-layout-radar" class="px-2.5 py-1 bg-zinc-900/60 text-zinc-400 rounded border border-zinc-800 text-xs font-mono transition flex items-center space-x-1.5 hover:text-zinc-200 hover:bg-zinc-800" title="Bố cục Quỹ Đạo Radar">
+                        <i class="fa-solid fa-bullseye text-amber-400 text-xs"></i>
+                        <span>Quỹ Đạo</span>
                     </button>
-                    <button id="btn-layout-cose" class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded border border-slate-700 font-mono transition flex items-center space-x-1.5 hover:bg-slate-700" title="Bố cục Lực Đàn Hồi vật lý tự do">
-                        <i class="fa-solid fa-atom text-purple-400"></i>
-                        <span>⚡ Tự Do (Physics)</span>
+                    <button id="btn-layout-cose" class="px-2.5 py-1 bg-zinc-900/60 text-zinc-400 rounded border border-zinc-800 text-xs font-mono transition flex items-center space-x-1.5 hover:text-zinc-200 hover:bg-zinc-800" title="Bố cục Vật Lý Tự Do">
+                        <i class="fa-solid fa-atom text-purple-400 text-xs"></i>
+                        <span>Tự Do</span>
                     </button>
-                    <div class="h-4 w-px bg-slate-700 mx-1"></div>
-                    <button id="btn-attack-path" onclick="toggleAttackPathSimulation()" class="px-2.5 py-1 bg-rose-950/80 hover:bg-rose-900 text-rose-300 rounded border border-rose-700/60 transition text-xs font-mono flex items-center space-x-1.5 shadow" title="Mô phỏng chuỗi tấn công Kill-Chain">
-                        <i class="fa-solid fa-bolt text-rose-400"></i>
-                        <span id="txt-attack-path">Mô Phỏng Kill-Chain</span>
+                    <div class="h-3.5 w-px bg-zinc-800 mx-0.5"></div>
+                    <button id="btn-attack-path" onclick="toggleAttackPathSimulation()" class="px-2.5 py-1 bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 rounded border border-rose-800/60 text-xs font-mono transition flex items-center space-x-1.5" title="Mô phỏng chuỗi tấn công Kill-Chain">
+                        <i class="fa-solid fa-bolt text-rose-400 text-xs"></i>
+                        <span id="txt-attack-path">Kill-Chain</span>
                     </button>
-                    <div class="h-4 w-px bg-slate-700 mx-1"></div>
-                    <button id="btn-graph-fit" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition" title="Căn giữa toàn bộ biểu đồ">
-                        <i class="fa-solid fa-expand mr-1"></i> Căn giữa
+                    <div class="h-3.5 w-px bg-zinc-800 mx-0.5"></div>
+                    <button id="btn-graph-fit" class="px-2 py-1 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 rounded border border-zinc-800 text-xs font-mono transition" title="Căn giữa toàn bộ biểu đồ">
+                        <i class="fa-solid fa-expand text-xs"></i>
                     </button>
-                    <button id="btn-graph-fullscreen" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition" title="Phóng to toàn màn hình">
-                        <i class="fa-solid fa-maximize mr-1"></i> Toàn màn hình
+                    <button id="btn-graph-fullscreen" class="px-2 py-1 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 rounded border border-zinc-800 text-xs font-mono transition" title="Toàn màn hình">
+                        <i class="fa-solid fa-maximize text-xs"></i>
                     </button>
-                    <div class="h-4 w-px bg-slate-700 mx-1"></div>
-                    <button id="btn-toggle-graph" onclick="toggleGraphCollapse()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded border border-slate-700 font-mono transition" title="Thu gọn hoặc mở rộng đồ thị">
-                        <i class="fa-solid fa-chevron-up mr-1" id="icon-toggle-graph"></i><span id="text-toggle-graph">Thu gọn</span>
+                    <div class="h-3.5 w-px bg-zinc-800 mx-0.5"></div>
+                    <button id="btn-toggle-graph" onclick="toggleGraphCollapse()" class="px-2 py-1 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-teal-400 rounded border border-zinc-800 text-xs font-mono transition" title="Thu gọn hoặc mở rộng đồ thị">
+                        <i class="fa-solid fa-chevron-up mr-1 text-xs" id="icon-toggle-graph"></i><span id="text-toggle-graph">Thu gọn</span>
                     </button>
                 </div>
             </div>
 
             <!-- Collapsible Body for Graph & Filters -->
             <div id="cy-container-body">
-            <!-- Filter Category Bar -->
-            <div class="px-5 py-2 border-b border-cyber-border/70 bg-slate-950/80 flex flex-wrap items-center gap-2 text-xs">
-                <span class="text-slate-400 font-mono text-[11px]"><i class="fa-solid fa-filter mr-1 text-cyan-400"></i>Lọc Node:</span>
-                <button class="graph-filter-btn active px-2.5 py-0.5 rounded bg-cyan-900/70 text-cyan-300 border border-cyan-600 text-[11px] font-mono hover:bg-cyan-800 transition" data-filter="all">Tất cả (All)</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="subdomain">🌐 Tên miền phụ</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="port">🔌 Cổng dịch vụ</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="js">📜 Gói JS Bundle</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="api">⚡ Điểm cuối API</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="bola">🐞 Mục tiêu BOLA</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="secret">🔑 Khóa bí mật</button>
-                <button class="graph-filter-btn px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-mono hover:text-white transition" data-filter="vuln">⚠️ Tệp nhạy cảm</button>
-            </div>
-
-            <!-- Canvas Container -->
-            <div class="relative w-full h-[540px] bg-[#070b14] overflow-hidden">
-                <!-- Floating Attack Path Kill-Chain HUD -->
-                <div id="hud-killchain" class="hidden absolute top-3 left-3 right-3 bg-slate-950/95 backdrop-blur border border-rose-500/80 px-4 py-2.5 rounded-xl shadow-[0_0_25px_rgba(239,68,68,0.35)] flex items-center justify-between text-xs font-mono z-20 transition-all">
-                    <div class="flex items-center space-x-2 text-rose-400 font-bold">
-                        <i class="fa-solid fa-skull-crossbones animate-bounce text-sm"></i>
-                        <span id="hud-killchain-title">ATTACK VECTOR ACTIVE:</span>
-                    </div>
-                    <div id="hud-killchain-steps" class="text-slate-200 text-[11px] truncate mx-3 flex-1">
-                        Root Target &rarr; Subdomain &rarr; Open Service &rarr; Leaked Secret
-                    </div>
-                    <button onclick="toggleAttackPathSimulation(false)" class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-rose-300 rounded border border-slate-700 transition">
-                        <i class="fa-solid fa-xmark mr-1"></i>Đóng
-                    </button>
+                <!-- Filter Category Bar -->
+                <div class="px-4 py-1.5 border-b border-zinc-800/40 bg-[#060a12]/60 flex flex-wrap items-center gap-1.5 text-xs">
+                    <span class="text-zinc-500 font-mono text-[10px] mr-1"><i class="fa-solid fa-filter mr-1 text-teal-400"></i>Lọc:</span>
+                    <button class="graph-filter-btn active px-2 py-0.5 rounded-full bg-teal-950/70 text-teal-300 border border-teal-700/60 text-[11px] font-mono hover:bg-teal-900/60 transition" data-filter="all">Tất cả</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="subdomain">Subdomain</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="port">Cổng dịch vụ</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="js">JS Bundle</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="api">API Endpoint</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="bola">Mục tiêu BOLA</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="secret">Khóa bí mật</button>
+                    <button class="graph-filter-btn px-2 py-0.5 rounded-full bg-zinc-900/40 text-zinc-400 border border-zinc-800/80 text-[11px] font-mono hover:bg-zinc-800/50 hover:text-zinc-200 transition" data-filter="vuln">Tệp nhạy cảm</button>
                 </div>
 
-                <div id="cy" class="w-full h-full"></div>
-                
-                <!-- Enhanced Graph Legend -->
-                <div class="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-800 px-3 py-2 rounded-lg text-[11px] text-slate-400 flex flex-wrap items-center gap-3 shadow-xl pointer-events-none z-10">
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rotate-45 bg-cyan-400 border border-cyan-200"></span>
-                        <span class="text-slate-300 font-mono">Mục tiêu gốc (Root)</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded bg-amber-600 border border-amber-400"></span>
-                        <span class="text-slate-300 font-mono">Cổng dịch vụ (Port)</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded bg-blue-600 border border-blue-400"></span>
-                        <span class="text-slate-300 font-mono">Tên miền phụ (Subdomain)</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded-full bg-purple-500 border border-purple-300"></span>
-                        <span class="text-slate-300 font-mono">Gói JS Bundle</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-300"></span>
-                        <span class="text-slate-300 font-mono">Điểm cuối API</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded-sm bg-orange-500 border border-orange-300"></span>
-                        <span class="text-slate-300 font-mono">Mục tiêu BOLA</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded-sm bg-rose-500 border border-rose-300"></span>
-                        <span class="text-slate-300 font-mono">Khóa bí mật</span>
-                    </div>
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-3 h-3 rounded-sm bg-pink-600 border border-pink-300"></span>
-                        <span class="text-slate-300 font-mono">Tệp nhạy cảm</span>
-                    </div>
-                </div>
-
-                <!-- Floating Interactive Node Inspector (Click on any node to view) -->
-                <div id="node-info-popup" class="hidden absolute top-4 right-4 bg-slate-900/95 border border-cyan-500/40 p-4 rounded-xl text-xs max-w-md font-mono shadow-2xl backdrop-blur z-20 transition">
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
-                        <div id="node-info-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-950 text-cyan-300 border border-cyan-800">
-                            CHI TIẾT NODE (DETAILS)
+                <!-- Canvas Container -->
+                <div class="relative w-full h-[540px] bg-[#050811] overflow-hidden">
+                    <!-- Floating Attack Path Kill-Chain HUD -->
+                    <div id="hud-killchain" class="hidden absolute top-3 left-3 right-3 bg-zinc-950/95 backdrop-blur-md border border-rose-500/60 px-4 py-2 rounded-xl shadow-lg flex items-center justify-between text-xs font-mono z-20 transition-all">
+                        <div class="flex items-center space-x-2 text-rose-400 font-semibold">
+                            <i class="fa-solid fa-skull-crossbones text-xs"></i>
+                            <span id="hud-killchain-title">ATTACK VECTOR ACTIVE:</span>
                         </div>
-                        <button id="btn-close-node-popup" class="text-slate-400 hover:text-white">
-                            <i class="fa-solid fa-xmark"></i>
+                        <div id="hud-killchain-steps" class="text-zinc-200 text-[11px] truncate mx-3 flex-1 font-mono">
+                            Root Target &rarr; Subdomain &rarr; Open Service &rarr; Leaked Secret
+                        </div>
+                        <button onclick="toggleAttackPathSimulation(false)" class="text-xs px-2 py-0.5 bg-zinc-900 hover:bg-zinc-800 text-rose-300 rounded border border-zinc-800 transition">
+                            <i class="fa-solid fa-xmark mr-1"></i>Đóng
                         </button>
                     </div>
-                    <div id="node-info-title" class="font-bold text-white text-sm break-all mb-1"></div>
-                    <div id="node-info-content" class="text-slate-300 text-[11px] leading-relaxed break-all bg-slate-950/70 p-2.5 rounded border border-slate-800/80 mb-2 max-h-36 overflow-y-auto"></div>
-                    <div id="node-info-actions" class="flex items-center space-x-2 pt-1"></div>
+
+                    <div id="cy" class="w-full h-full"></div>
+
+                    <!-- Enhanced Graph Legend -->
+                    <div class="absolute bottom-3 left-3 bg-zinc-950/85 backdrop-blur-md border border-zinc-800/80 px-3 py-1.5 rounded-lg text-[10px] text-zinc-400 flex flex-wrap items-center gap-3 shadow-lg pointer-events-none z-10">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2.5 h-2.5 rotate-45 bg-teal-400 border border-teal-200"></span>
+                            <span class="text-zinc-300 font-mono">Root</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
+                            <span class="text-zinc-300 font-mono">Port</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-sky-500"></span>
+                            <span class="text-zinc-300 font-mono">Subdomain</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                            <span class="text-zinc-300 font-mono">JS Bundle</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-zinc-300 font-mono">API</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-rose-500"></span>
+                            <span class="text-zinc-300 font-mono">Secret</span>
+                        </div>
+                    </div>
+
+                    <!-- Floating Interactive Node Inspector (Click on any node to view) -->
+                    <div id="node-info-popup" class="hidden absolute top-4 right-4 bg-zinc-950/95 border border-teal-500/40 p-4 rounded-xl text-xs max-w-md font-mono shadow-2xl backdrop-blur-md z-20 transition">
+                        <div class="flex items-center justify-between pb-2 border-b border-zinc-800 mb-2">
+                            <div id="node-info-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-950/80 text-teal-300 border border-teal-800">
+                                CHI TIẾT NODE (DETAILS)
+                            </div>
+                            <button id="btn-close-node-popup" class="text-zinc-400 hover:text-white">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div id="node-info-title" class="font-bold text-white text-sm break-all mb-1"></div>
+                        <div id="node-info-content" class="text-zinc-300 text-[11px] leading-relaxed break-all bg-zinc-900/70 p-2.5 rounded border border-zinc-800/80 mb-2 max-h-36 overflow-y-auto"></div>
+                        <div id="node-info-actions" class="flex items-center space-x-2 pt-1"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
             <!-- Tab Contents Container -->
             <div class="bg-cyber-card border border-cyber-border rounded-xl overflow-hidden shadow-xl">
 <!-- Tab 1 Contents: Subdomains & Infrastructure Overview -->
+
+            <!-- Defensive status elements -->
+            <div class="hidden">
+                <span id="stat-engine-badge">Local Engine</span>
+                <span id="pipeline-status-badge">Standby</span>
+                <span id="pipeline-direction-indicator">&rarr;</span>
+                <span id="pipeline-data-packet">0 KB</span>
+                <div id="sourcemaps-container"></div>
+            </div>
+
+
+        <!-- TAB CONTENTS CONTAINER -->
+        <div class="tab-contents-container space-y-6">
+
+            <!-- TAB 1: SUBDOMAINS & INFRASTRUCTURE -->
             <div id="tab-subdomains" class="tab-content p-5 space-y-6">
                 <!-- 1. Technology Stack Recognition -->
                 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 sm:p-5 space-y-3 shadow-xl">
@@ -1669,12 +1679,297 @@
                     </div>
                 </div>
             </div>
+
+        
+        <!-- TAB 11: STRICT SCOPE & TARGET GUARD -->
+        <div id="tab-scope" class="tab-content hidden p-5 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1a2337] pb-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2 text-xs font-mono text-cyan-400">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <span class="font-bold uppercase tracking-wider">Mô-đun 11: Scope Control &amp; Target Whitelist</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Kiểm Soát Phạm Vi &amp; Ngăn Ngừa Tấn Công Ngoài Phạm Vi</h3>
+                    <p class="text-xs text-slate-400">Xác thực ranh giới mục tiêu, phát hiện liên kết trỏ tới dịch vụ đám mây bên thứ ba (Third-Party SaaS) và ngăn chặn rủi ro quét nhầm hạ tầng ngoài hợp đồng.</p>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                    <span id="scope-status-badge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">Chờ Đánh Giá</span>
+                </div>
+            </div>
+
+            <!-- Scope Configuration & Evaluation Console -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Configuration Form -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 space-y-4 shadow-xl">
+                    <div class="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-sliders text-cyan-400"></i>
+                        <span>Thiết Lập Quy Tắc Phạm Vi (Scope Rules)</span>
+                    </div>
+                    <div class="space-y-3 font-mono text-xs">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Mục tiêu cần đánh giá (Target FQDN / URL):</label>
+                            <input id="scope-test-target" type="text" placeholder="VD: api.target.edu.vn hoặc https://target.edu.vn" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-white font-mono focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Danh sách cho phép (In-Scope Whitelist - Phân cách bằng dấu phẩy):</label>
+                            <input id="scope-whitelist" type="text" value="*.target.edu.vn, target.edu.vn" placeholder="VD: *.example.com, api.example.com" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-emerald-300 font-mono focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Danh sách loại trừ (Out-Of-Scope Blacklist):</label>
+                            <input id="scope-blacklist" type="text" value="admin.target.edu.vn, *.s3.amazonaws.com" placeholder="VD: dev.example.com, test.example.com" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-rose-300 font-mono focus:outline-none focus:border-rose-500">
+                        </div>
+                        <div class="flex items-center space-x-2 pt-1 font-sans text-xs">
+                            <input id="scope-allow-private" type="checkbox" class="rounded border-slate-700 bg-slate-900 text-cyan-500">
+                            <label for="scope-allow-private" class="text-slate-400 cursor-pointer">Cho phép dải IP nội bộ / Private Network (RFC 1918)</label>
+                        </div>
+                    </div>
+                    <button onclick="evaluateTargetScope()" class="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs transition flex items-center justify-center space-x-2 shadow-lg shadow-cyan-600/20">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>ĐÁNH GIÁ PHẠM VI MỤC TIÊU</span>
+                    </button>
+                </div>
+
+                <!-- Right: Evaluation Results Card -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 space-y-4 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2 mb-3">
+                            <i class="fa-solid fa-clipboard-check text-emerald-400"></i>
+                            <span>Kết Quả Đánh Giá Ranh Giới (Evaluation Verdict)</span>
+                        </div>
+                        <div id="scope-result-box" class="bg-[#080d19] border border-slate-800 rounded-lg p-4 font-mono text-xs space-y-2.5">
+                            <div class="text-slate-500 italic">Nhấn "ĐÁNH GIÁ PHẠM VI MỤC TIÊU" để kiểm tra tính hợp lệ...</div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 text-[11px] text-slate-400">
+                        <i class="fa-solid fa-circle-info text-sky-400 mr-1.5"></i>
+                        <strong>Cơ chế tự vệ:</strong> Khi quét diện rộng, x1vart tự động đối chiếu các bản ghi CNAME; nếu tên miền trỏ về AWS S3, Cloudflare, Azure, Heroku hoặc Zendesk, hệ thống sẽ phát cảnh báo ngăn chặn xâm nhập trái phép hạ tầng bên thứ ba.
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- End of Tab Contents Container -->
-    </main>
-</div>
-<!-- NATIVE LIVE API TESTER CONSOLE (SLIDE-OVER DRAWER) -->
-    <div id="api-tester-drawer" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-end">
+
+        <!-- TAB 12: DYNAMIC SPA CRAWLER -->
+        <div id="tab-spa" class="tab-content hidden p-5 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1a2337] pb-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2 text-xs font-mono text-cyan-400">
+                        <i class="fa-solid fa-spider"></i>
+                        <span class="font-bold uppercase tracking-wider">Mô-đun 12: Dynamic SPA Crawler (Headless Engine)</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Thu Thập Động Ứng Dụng Đơn Trang (SPA Crawler)</h3>
+                    <p class="text-xs text-slate-400">Sử dụng Playwright Chromium Headless cào sâu các ứng dụng React, Vue, Angular và Vite để trích xuất dynamic chunks, API ngầm và liên kết Source Map.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span id="spa-engine-badge" class="px-2.5 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700 font-mono text-xs">Playwright Headless</span>
+                </div>
+            </div>
+
+            <!-- Target Input & Crawler Trigger -->
+            <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 space-y-4 shadow-xl">
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <div class="relative flex-1 w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 font-mono text-xs">URL:</div>
+                        <input id="spa-crawler-url" type="text" placeholder="https://app.target.edu.vn hoặc trang Single Page App..." class="w-full pl-12 pr-4 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-xs font-mono text-sky-300 focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <button onclick="runDynamicSpaCrawler()" id="btn-run-spa" class="w-full sm:w-auto px-5 py-2 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold rounded-lg text-xs transition flex items-center justify-center space-x-2 shrink-0">
+                        <i class="fa-solid fa-play"></i>
+                        <span>KHỞI CHẠY SPA CRAWLER</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SPA Results Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Chunks -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-4 space-y-3 shadow-xl flex flex-col">
+                    <div class="flex items-center justify-between border-b border-[#1a2337] pb-2">
+                        <span class="text-xs font-bold text-white font-mono flex items-center space-x-2">
+                            <i class="fa-brands fa-js text-amber-400"></i>
+                            <span>Tệp JS Chunks Tải Động</span>
+                        </span>
+                        <span id="spa-scripts-count" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">0</span>
+                    </div>
+                    <div id="spa-scripts-list" class="flex-1 max-h-72 overflow-y-auto space-y-1 text-xs font-mono">
+                        <div class="text-slate-500 italic p-3 text-center">Chưa có dữ liệu cào...</div>
+                    </div>
+                </div>
+
+                <!-- Endpoints -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-4 space-y-3 shadow-xl flex flex-col">
+                    <div class="flex items-center justify-between border-b border-[#1a2337] pb-2">
+                        <span class="text-xs font-bold text-white font-mono flex items-center space-x-2">
+                            <i class="fa-solid fa-satellite text-emerald-400"></i>
+                            <span>API Bị Chặn Bắt (XHR/Fetch)</span>
+                        </span>
+                        <span id="spa-apis-count" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">0</span>
+                    </div>
+                    <div id="spa-apis-list" class="flex-1 max-h-72 overflow-y-auto space-y-1 text-xs font-mono">
+                        <div class="text-slate-500 italic p-3 text-center">Chưa có dữ liệu cào...</div>
+                    </div>
+                </div>
+
+                <!-- Sourcemaps -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-4 space-y-3 shadow-xl flex flex-col">
+                    <div class="flex items-center justify-between border-b border-[#1a2337] pb-2">
+                        <span class="text-xs font-bold text-white font-mono flex items-center space-x-2">
+                            <i class="fa-solid fa-folder-tree text-purple-400"></i>
+                            <span>Source Maps (.js.map)</span>
+                        </span>
+                        <span id="spa-maps-count" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">0</span>
+                    </div>
+                    <div id="spa-maps-list" class="flex-1 max-h-72 overflow-y-auto space-y-1 text-xs font-mono">
+                        <div class="text-slate-500 italic p-3 text-center">Chưa có dữ liệu cào...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 13: ACTIVE DUAL-TOKEN BOLA VALIDATOR -->
+        <div id="tab-bola" class="tab-content hidden p-5 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1a2337] pb-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2 text-xs font-mono text-rose-400">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span class="font-bold uppercase tracking-wider">Mô-đun 13: Active Dual-Token BOLA / IDOR Validator</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Kiểm Thử Chủ Động Lỗ Hổng Ủy Quyen Đối Tượng (BOLA)</h3>
+                    <p class="text-xs text-slate-400">Tự động phát hiện vi phạm ranh giới phân quyền ngang hàng (OWASP API1:2023) thông qua kỹ thuật đối sánh 2 token người dùng User A và User B.</p>
+                </div>
+            </div>
+
+            <!-- Dual-Token Configuration Console -->
+            <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 space-y-4 shadow-xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 font-mono text-xs">
+                    <div class="md:col-span-2">
+                        <label class="block text-slate-400 mb-1">Mẫu Endpoint Template (chứa {id}):</label>
+                        <input id="bola-template" type="text" value="/api/v1/orders/{orderId}" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-white font-mono focus:outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Base URL:</label>
+                        <input id="bola-base-url" type="text" value="https://target.edu.vn" placeholder="https://api.example.com" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-white font-mono focus:outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Phương thức (Method):</label>
+                        <select id="bola-method" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-white font-mono focus:outline-none focus:border-rose-500 font-bold">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+                    <!-- User A (Victim / Baseline) -->
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 space-y-2">
+                        <div class="text-emerald-400 font-bold text-[11px] flex items-center space-x-1.5">
+                            <i class="fa-solid fa-user-check"></i>
+                            <span>Chủ Thể A (User A - Nạn nhân hợp lệ)</span>
+                        </div>
+                        <input id="bola-user-a-res" type="text" value="ORD-9021" placeholder="Mã tài nguyên của A (VD: ORD-9021)" class="w-full px-2.5 py-1.5 bg-[#080d19] border border-slate-700 rounded text-slate-200 text-[11px]">
+                        <input id="bola-user-a-token" type="text" placeholder="Bearer Token User A (eyJhbGciOi...)" class="w-full px-2.5 py-1.5 bg-[#080d19] border border-slate-700 rounded text-slate-200 text-[11px]">
+                    </div>
+
+                    <!-- User B (Attacker / Unauthorized probe) -->
+                    <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800 space-y-2">
+                        <div class="text-rose-400 font-bold text-[11px] flex items-center space-x-1.5">
+                            <i class="fa-solid fa-user-ninja"></i>
+                            <span>Chủ Thể B (User B - Người thử xâm nhập)</span>
+                        </div>
+                        <input id="bola-user-b-res" type="text" value="ORD-9022" placeholder="Mã tài nguyên của B (VD: ORD-9022)" class="w-full px-2.5 py-1.5 bg-[#080d19] border border-slate-700 rounded text-slate-200 text-[11px]">
+                        <input id="bola-user-b-token" type="text" placeholder="Bearer Token User B (eyJhbGciOi...)" class="w-full px-2.5 py-1.5 bg-[#080d19] border border-slate-700 rounded text-slate-200 text-[11px]">
+                    </div>
+                </div>
+
+                <button onclick="runActiveBolaAudit()" class="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs transition flex items-center justify-center space-x-2 shadow-lg shadow-rose-600/20">
+                    <i class="fa-solid fa-radiation"></i>
+                    <span>THỰC THI KIỂM THỬ XÂM NHẬP BOLA CHỦ ĐỘNG</span>
+                </button>
+            </div>
+
+            <!-- BOLA Results View -->
+            <div id="bola-results-container" class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 shadow-xl space-y-4">
+                <div class="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                    <i class="fa-solid fa-clipboard-list text-cyan-400"></i>
+                    <span>Kết Quả Đánh Giá Phân Quyền (BOLA Verdict)</span>
+                </div>
+                <div id="bola-results-body" class="p-4 bg-[#080d19] rounded-lg border border-slate-800 text-xs font-mono text-slate-500 italic">
+                    Chưa thực thi kiểm thử. Nhập token và nhấn "THỰC THI KIỂM THỬ XÂM NHẬP BOLA" để bắt đầu...
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 14: AUTH SESSION & BURP SUITE BRIDGE -->
+        <div id="tab-burp" class="tab-content hidden p-5 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1a2337] pb-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2 text-xs font-mono text-orange-400">
+                        <i class="fa-solid fa-plug-circle-bolt"></i>
+                        <span class="font-bold uppercase tracking-wider">Mô-đun 14: Authenticated Recon &amp; Burp Suite Bridge</span>
+                    </div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Quản Lý Phiên Xác Thực &amp; Cầu Nối Burp Suite</h3>
+                    <p class="text-xs text-slate-400">Cấu hình Header xác thực tập trung cho toàn bộ luồng trinh sát và chuyển tiếp bề mặt API sang Burp Suite Proxy (127.0.0.1:8080) hoặc xuất tệp Burp XML Sitemap.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="downloadBurpXmlSitemap()" class="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-lg text-xs font-mono transition flex items-center space-x-1.5 shadow">
+                        <i class="fa-solid fa-file-export"></i>
+                        <span>XUẤT BURP XML SITEMAP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Burp Suite Proxy Status & Forwarder -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Proxy Status Card -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 space-y-4 shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div class="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                            <i class="fa-solid fa-network-wired text-orange-400"></i>
+                            <span>Trạng Thái Burp Suite Proxy</span>
+                        </div>
+                        <span id="burp-proxy-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">Chưa kiểm tra</span>
+                    </div>
+                    <div class="space-y-2 font-mono text-xs">
+                        <label class="block text-slate-400">Địa chỉ Burp Proxy (HTTP/HTTPS):</label>
+                        <div class="flex space-x-2">
+                            <input id="burp-proxy-url" type="text" value="http://127.0.0.1:8080" class="flex-1 px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-slate-200">
+                            <button onclick="checkBurpProxyOnline()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 rounded-lg border border-slate-700 shrink-0">Kiểm tra</button>
+                        </div>
+                    </div>
+                    <div id="burp-proxy-msg" class="p-3 bg-slate-900/60 rounded border border-slate-800 text-[11px] text-slate-400">
+                        Đảm bảo Burp Suite đang chạy và lắng nghe tại <code class="text-orange-300">127.0.0.1:8080</code> (Proxy &gt; Options &gt; Proxy Listeners).
+                    </div>
+                </div>
+
+                <!-- Global Auth Headers Card -->
+                <div class="bg-[#0c1222] border border-[#1a2337] rounded-xl p-5 space-y-4 shadow-xl">
+                    <div class="text-xs font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+                        <i class="fa-solid fa-key text-emerald-400"></i>
+                        <span>Thiết Lập Token &amp; Header Toàn Cục</span>
+                    </div>
+                    <div class="space-y-2 font-mono text-xs">
+                        <label class="block text-slate-400">Bearer Token mặc định:</label>
+                        <input id="auth-global-bearer" type="text" placeholder="Bearer eyJhbGciOi..." class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-slate-200">
+                        <label class="block text-slate-400 pt-1">Custom Header (VD: X-API-Key: secret):</label>
+                        <input id="auth-global-headers" type="text" placeholder="X-Custom-Auth: value, Cookie: session=xyz" class="w-full px-3 py-2 bg-[#080d19] border border-[#1a2337] rounded-lg text-slate-200">
+                    </div>
+                    <button onclick="saveGlobalAuthHeaders()" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs transition">LƯU CẤU HÌNH PHIÊN</button>
+                </div>
+            </div>
+        </div>
+        <!-- End of TAB 14 (tab-burp) -->
+
+        </div>
+        <!-- End of tab-contents-container -->
+    </div>
+    <!-- End of bg-cyber-card tab wrapper -->
+
+</main>
+    </div>
+    <!-- End of RIGHT MAIN CONTENT WRAPPER -->
+
+    <!-- NATIVE LIVE API TESTER CONSOLE (SLIDE-OVER DRAWER) -->
+<div id="api-tester-drawer" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-end">
         <div class="w-full max-w-2xl bg-cyber-card border-l border-cyber-border h-full shadow-2xl flex flex-col p-6 space-y-4 overflow-y-auto drawer-content-animated">
             <div class="flex items-center justify-between border-b border-cyber-border pb-3">
                 <div class="flex items-center space-x-2">
@@ -1727,8 +2022,11 @@
         </div>
     </div>
 
-    <!-- Frontend Core Application Logic -->
+    <!-- Frontend Core Application Logi
+
+    <!-- CORE JAVASCRIPT LOGIC -->
     <script>
+
         // Defensive Type Helpers
         const asArray = (val) => Array.isArray(val) ? val : [];
         const asObj = (val) => (val && typeof val === 'object' && !Array.isArray(val)) ? val : {};
@@ -2072,13 +2370,23 @@
         }
 
         let currentScanData = null;
+        let currentScanResults = null;
         let cy = null;
 
         const targetInput = document.getElementById('target-input');
         const btnStartScan = document.getElementById('btn-start-scan');
         const scanStatusText = document.getElementById('scan-status-text');
 
-        // Tab Switching
+        // Demo Target Quick-Fill Helper
+        function setDemoTarget(target = 'target.edu.vn') {
+            const input = document.getElementById('target-input') || targetInput;
+            if (input) {
+                input.value = target;
+                input.focus();
+            }
+        }
+
+        // Tab Switching & Viewport Scroll Navigation
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => {
@@ -2091,7 +2399,16 @@
                 btn.classList.remove('text-slate-400', 'border-transparent');
                 const targetId = btn.getAttribute('data-target');
                 const targetEl = document.getElementById(targetId);
-                if (targetEl) targetEl.classList.remove('hidden');
+                if (targetEl) {
+                    targetEl.classList.remove('hidden');
+                    // Scroll viewport smoothly to ensure tab content is immediately in view
+                    if (targetId !== 'tab-subdomains') {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        const scrollContainer = document.querySelector('.overflow-y-auto');
+                        if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
                 if (targetId === 'tab-history') {
                     renderHistoryTab();
                 }
@@ -2565,6 +2882,8 @@
             if (data.scan_id) {
                 const reportBtn = document.getElementById('btn-export-report');
                 if (reportBtn) reportBtn.href = `/api/report/export?scan_id=${data.scan_id}`;
+                const ptesBtn = document.getElementById('btn-export-ptes-json');
+                if (ptesBtn) ptesBtn.href = `/api/report/json?scan_id=${data.scan_id}`;
                 const openapiBtn = document.getElementById('btn-export-openapi');
                 if (openapiBtn) openapiBtn.href = `/api/openapi/download?scan_id=${data.scan_id}`;
                 const headerReportBtn = document.getElementById('btn-header-report');
@@ -3829,6 +4148,8 @@ export default AuthService;`;
             { title: "Mô phỏng chuỗi tấn công (Kill-Chain Simulation)", icon: "fa-solid fa-bolt text-rose-400", action: () => { closeCommandPalette(); document.querySelector('.tab-btn[data-target="tab-subdomains"]')?.click(); toggleAttackPathSimulation(true); } },
             { title: "Mở Native API Tester Console", icon: "fa-solid fa-terminal text-emerald-400", action: () => { closeCommandPalette(); document.getElementById('api-tester-drawer')?.classList.remove('hidden'); } },
             { title: "Xuất Báo Cáo Kiểm Toán (HTML/PDF)", icon: "fa-solid fa-file-invoice text-blue-400", action: () => { closeCommandPalette(); window.open('/api/report/export', '_blank'); } },
+            { title: "Xuất Báo Cáo Chuẩn PTES / DefectDojo (JSON)", icon: "fa-solid fa-file-code text-amber-400", action: () => { closeCommandPalette(); window.open('/api/report/json', '_blank'); } },
+            { title: "Kích Hoạt Active Exploit Auditor (SQLi / XSS)", icon: "fa-solid fa-bolt text-rose-400", action: () => { closeCommandPalette(); triggerActiveExploitAudit(); } },
             { title: "Tải file đặc tả OpenAPI 3.0 (JSON)", icon: "fa-solid fa-file-code text-emerald-400", action: () => { closeCommandPalette(); window.location.href = '/api/openapi/download'; } }
         ];
 
@@ -3935,6 +4256,43 @@ export default AuthService;`;
         document.getElementById('cmd-palette-input')?.addEventListener('input', (e) => {
             filterCommandPalette(e.target.value);
         });
+
+        async function triggerActiveExploitAudit() {
+            const targetInput = document.getElementById('target-input');
+            const target = (currentScanData?.target || currentScanData?.domain || targetInput?.value || '').trim();
+            if (!target) {
+                alert("Vui lòng nhập mục tiêu kiểm thử (URL hoặc Domain) vào thanh tìm kiếm trước!");
+                return;
+            }
+            const fullUrl = target.startsWith('http') ? target : `https://${target}`;
+            const param = prompt(`Nhập tham số URL cần kiểm tra SQLi & XSS trên ${fullUrl}:`, "id") || "id";
+
+            const scanStatusText = document.getElementById('scan-status-text');
+            if (scanStatusText) scanStatusText.textContent = `Active Audit: Đang kiểm tra SQLi/XSS trên tham số ${param}...`;
+
+            try {
+                const resp = await fetch('/api/exploit/audit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target_url: fullUrl, param_name: param, vuln_type: 'ALL' })
+                });
+                const res = await resp.json();
+                if (!resp.ok) {
+                    alert(`Lỗi kiểm thử Exploit: ${res.error || 'Server error'}`);
+                    return;
+                }
+                if (res.total_findings > 0) {
+                    const findingsSummary = res.findings.map(f => `• [${f.vuln_type}] ${f.cwe}\n  Payload: ${f.payload}\n  Bằng chứng: ${f.evidence}`).join('\n\n');
+                    alert(`⚠️ PHÁT HIỆN ${res.total_findings} LỖ HỔNG XÁC THỰC:\n\n${findingsSummary}`);
+                } else {
+                    alert(`✅ Hoàn tất kiểm thử tham số '${param}'. Không phát hiện phản hồi bất thường của SQLi hay Reflected XSS.`);
+                }
+            } catch (err) {
+                alert(`Lỗi kết nối Active Exploit Audit: ${err.message}`);
+            } finally {
+                if (scanStatusText) scanStatusText.textContent = 'Trạng thái: Sẵn sàng';
+            }
+        }
 
         // ==========================================
         // CYTOSCAPE.JS ADVANCED ATTACK SURFACE GRAPH
@@ -4059,6 +4417,47 @@ export default AuthService;`;
                             'width': 30,
                             'height': 30,
                             'color': '#fda4af',
+                            'font-weight': 'bold'
+                        }
+                    },
+                    // Active SQL Injection Exploit
+                    {
+                        selector: 'node[type="exploit_sqli"]',
+                        style: {
+                            'shape': 'hexagon',
+                            'background-color': '#dc2626',
+                            'border-color': '#f87171',
+                            'border-width': 3,
+                            'width': 32,
+                            'height': 32,
+                            'color': '#fca5a5',
+                            'font-weight': 'bold'
+                        }
+                    },
+                    // Active XSS Exploit
+                    {
+                        selector: 'node[type="exploit_xss"]',
+                        style: {
+                            'shape': 'vee',
+                            'background-color': '#d97706',
+                            'border-color': '#fde047',
+                            'border-width': 2.5,
+                            'width': 28,
+                            'height': 28,
+                            'color': '#fef08a'
+                        }
+                    },
+                    // Firewall / pfSense Node
+                    {
+                        selector: 'node[type="firewall"]',
+                        style: {
+                            'shape': 'barrel',
+                            'background-color': '#0d9488',
+                            'border-color': '#5eead4',
+                            'border-width': 2.5,
+                            'width': 32,
+                            'height': 32,
+                            'color': '#99f6e4',
                             'font-weight': 'bold'
                         }
                     },
@@ -4362,15 +4761,15 @@ export default AuthService;`;
             if (!btnTree || !btnRadar || !btnCose) return;
 
             [btnTree, btnRadar, btnCose].forEach(b => {
-                b.className = 'px-2.5 py-1 bg-slate-800 text-slate-300 rounded border border-slate-700 font-mono transition flex items-center space-x-1.5 hover:bg-slate-700';
+                b.className = 'px-2.5 py-1 bg-zinc-900/60 text-zinc-400 rounded border border-zinc-800 text-xs font-mono transition flex items-center space-x-1.5 hover:text-zinc-200 hover:bg-zinc-800';
             });
 
             if (active === 'tree') {
-                btnTree.className = 'px-2.5 py-1 bg-cyan-950/90 text-cyan-300 rounded border border-cyan-600/80 font-mono font-semibold transition flex items-center space-x-1.5 hover:bg-cyan-900';
+                btnTree.className = 'px-2.5 py-1 bg-teal-950/70 text-teal-300 rounded border border-teal-700/60 text-xs font-mono font-medium transition flex items-center space-x-1.5 hover:bg-teal-900/50';
             } else if (active === 'radar') {
-                btnRadar.className = 'px-2.5 py-1 bg-amber-950/90 text-amber-300 rounded border border-amber-600/80 font-mono font-semibold transition flex items-center space-x-1.5 hover:bg-amber-900';
+                btnRadar.className = 'px-2.5 py-1 bg-amber-950/70 text-amber-300 rounded border border-amber-700/60 text-xs font-mono font-medium transition flex items-center space-x-1.5 hover:bg-amber-900/50';
             } else if (active === 'cose') {
-                btnCose.className = 'px-2.5 py-1 bg-purple-950/90 text-purple-300 rounded border border-purple-600/80 font-mono font-semibold transition flex items-center space-x-1.5 hover:bg-purple-900';
+                btnCose.className = 'px-2.5 py-1 bg-purple-950/70 text-purple-300 rounded border border-purple-700/60 text-xs font-mono font-medium transition flex items-center space-x-1.5 hover:bg-purple-900/50';
             }
         }
 
@@ -4405,11 +4804,11 @@ export default AuthService;`;
         document.querySelectorAll('.graph-filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.graph-filter-btn').forEach(b => {
-                    b.classList.remove('active', 'bg-cyan-900/70', 'text-cyan-300', 'border-cyan-600');
-                    b.classList.add('bg-slate-800', 'text-slate-400', 'border-slate-700');
+                    b.classList.remove('active', 'bg-teal-950/70', 'text-teal-300', 'border-teal-700/60');
+                    b.classList.add('bg-zinc-900/40', 'text-zinc-400', 'border-zinc-800/80');
                 });
-                btn.classList.add('active', 'bg-cyan-900/70', 'text-cyan-300', 'border-cyan-600');
-                btn.classList.remove('bg-slate-800', 'text-slate-400', 'border-slate-700');
+                btn.classList.add('active', 'bg-teal-950/70', 'text-teal-300', 'border-teal-700/60');
+                btn.classList.remove('bg-zinc-900/40', 'text-zinc-400', 'border-zinc-800/80');
 
                 const filter = btn.getAttribute('data-filter');
                 filterGraphElements(filter);
@@ -5010,12 +5409,274 @@ export default AuthService;`;
             }
         }
 
+        
+        // =========================================================================
+        // MODULES 11-14: JAVASCRIPT HANDLERS
+        // =========================================================================
+        async function evaluateTargetScope() {
+            const target = (document.getElementById('scope-test-target')?.value || '').trim() || (targetInput?.value || '').trim();
+            const inScope = (document.getElementById('scope-whitelist')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+            const outOfScope = (document.getElementById('scope-blacklist')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+            const allowPrivate = document.getElementById('scope-allow-private')?.checked || false;
+            const resBox = document.getElementById('scope-result-box');
+            const badge = document.getElementById('scope-status-badge');
+
+            if (!target) {
+                if (resBox) resBox.innerHTML = '<span class="text-rose-400">Vui lòng nhập mục tiêu để đánh giá phạm vi.</span>';
+                return;
+            }
+
+            if (resBox) resBox.innerHTML = '<span class="text-cyan-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang đối chiếu quy tắc phạm vi &amp; phân giải DNS/CNAME...</span>';
+
+            try {
+                const res = await fetch('/api/scope/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target: target,
+                        in_scope: inScope,
+                        out_of_scope: outOfScope,
+                        allow_private_ips: allowPrivate
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    const statusClass = data.is_in_scope ? 'text-emerald-400 bg-emerald-950/80 border-emerald-700' : 'text-rose-400 bg-rose-950/80 border-rose-700';
+                    const statusText = data.is_in_scope ? 'IN-SCOPE (HỢP LỆ CHO PHÉP QUÉT)' : 'OUT-OF-SCOPE (BỊ TỪ CHỐI)';
+                    if (badge) {
+                        badge.className = `px-3 py-1 rounded-full text-xs font-mono font-bold border ${statusClass}`;
+                        badge.textContent = data.is_in_scope ? 'IN-SCOPE' : 'OUT-OF-SCOPE';
+                    }
+                    resBox.innerHTML = `
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <span class="text-slate-400">Kết luận kiểm soát:</span>
+                            <span class="font-bold px-2 py-0.5 rounded text-[11px] ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div><span class="text-slate-500">Mục tiêu:</span> <code class="text-white">${escapeHtml(data.target)}</code></div>
+                            <div><span class="text-slate-500">Hostname:</span> <code class="text-white">${escapeHtml(data.hostname)}</code></div>
+                            <div><span class="text-slate-500">Quy tắc khớp:</span> <code class="text-cyan-300">${escapeHtml(data.matched_rule || 'Không khớp')}</code></div>
+                            <div><span class="text-slate-500">Dịch vụ đám mây bên thứ 3:</span> <span class="${data.is_third_party ? 'text-rose-400 font-bold' : 'text-emerald-400'}">${data.is_third_party ? 'CÓ (Cảnh báo)' : 'KHÔNG'}</span></div>
+                        </div>
+                        ${data.warning ? `<div class="p-2 rounded bg-rose-950/40 border border-rose-800 text-rose-300 text-[11px]">⚠️ ${escapeHtml(data.warning)}</div>` : ''}
+                        ${data.cnames && data.cnames.length ? `<div class="text-[11px] text-slate-400">Bản ghi CNAME: <code class="text-slate-300">${escapeHtml(data.cnames.join(', '))}</code></div>` : ''}
+                        ${data.resolved_ips && data.resolved_ips.length ? `<div class="text-[11px] text-slate-400">IP phân giải: <code class="text-slate-300">${escapeHtml(data.resolved_ips.join(', '))}</code></div>` : ''}
+                    `;
+                } else {
+                    resBox.innerHTML = `<span class="text-rose-400">Lỗi: ${escapeHtml(data.error || 'Đánh giá thất bại')}</span>`;
+                }
+            } catch (err) {
+                if (resBox) resBox.innerHTML = `<span class="text-rose-400">Lỗi kết nối API: ${escapeHtml(err.message)}</span>`;
+            }
+        }
+
+        async function runDynamicSpaCrawler() {
+            const url = (document.getElementById('spa-crawler-url')?.value || '').trim() || (targetInput?.value || '').trim();
+            const btn = document.getElementById('btn-run-spa');
+            const scriptsList = document.getElementById('spa-scripts-list');
+            const apisList = document.getElementById('spa-apis-list');
+            const mapsList = document.getElementById('spa-maps-list');
+            const scriptsCount = document.getElementById('spa-scripts-count');
+            const apisCount = document.getElementById('spa-apis-count');
+            const mapsCount = document.getElementById('spa-maps-count');
+
+            if (!url) {
+                alert('Vui lòng nhập URL Single Page App để cào dữ liệu.');
+                return;
+            }
+
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang cào SPA...';
+            if (scriptsList) scriptsList.innerHTML = '<div class="text-cyan-400 p-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Đang thực thi Playwright Chromium Headless...</div>';
+
+            try {
+                const res = await fetch('/api/crawler/spa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, timeout_ms: 25000 })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    const scripts = asArray(data.discovered_scripts);
+                    const apis = asArray(data.api_endpoints);
+                    const maps = asArray(data.sourcemaps);
+
+                    if (scriptsCount) scriptsCount.textContent = scripts.length;
+                    if (apisCount) apisCount.textContent = apis.length;
+                    if (mapsCount) mapsCount.textContent = maps.length;
+
+                    if (scriptsList) {
+                        scriptsList.innerHTML = scripts.length ? scripts.map(s => `
+                            <div class="p-1.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 truncate text-[11px] text-amber-300 flex items-center justify-between">
+                                <span class="truncate pr-2">${escapeHtml(s)}</span>
+                                <button onclick="copyToClipboard('${escapeHtml(s)}')" class="text-slate-400 hover:text-white px-1 text-[10px]"><i class="fa-regular fa-copy"></i></button>
+                            </div>
+                        `).join('') : '<div class="text-slate-500 italic p-3 text-center">Không phát hiện script chunk tải động.</div>';
+                    }
+
+                    if (apisList) {
+                        apisList.innerHTML = apis.length ? apis.map(a => `
+                            <div class="p-1.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 truncate text-[11px] text-emerald-300 flex items-center justify-between">
+                                <span class="truncate pr-2">${escapeHtml(a)}</span>
+                                <button onclick="openApiTester('${escapeHtml(a)}')" class="text-cyan-400 hover:text-cyan-300 px-1 text-[10px]"><i class="fa-solid fa-play"></i></button>
+                            </div>
+                        `).join('') : '<div class="text-slate-500 italic p-3 text-center">Không phát hiện API endpoint qua mạng.</div>';
+                    }
+
+                    if (mapsList) {
+                        mapsList.innerHTML = maps.length ? maps.map(m => `
+                            <div class="p-1.5 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 truncate text-[11px] text-purple-300 flex items-center justify-between">
+                                <span class="truncate pr-2">${escapeHtml(m)}</span>
+                                <button onclick="copyToClipboard('${escapeHtml(m)}')" class="text-slate-400 hover:text-white px-1 text-[10px]"><i class="fa-regular fa-copy"></i></button>
+                            </div>
+                        `).join('') : '<div class="text-slate-500 italic p-3 text-center">Không tìm thấy liên kết Source Map.</div>';
+                    }
+                } else {
+                    if (scriptsList) scriptsList.innerHTML = `<div class="text-rose-400 p-2">Lỗi cào SPA: ${escapeHtml(data.error || 'Không rõ')}</div>`;
+                }
+            } catch (err) {
+                if (scriptsList) scriptsList.innerHTML = `<div class="text-rose-400 p-2">Lỗi kết nối API: ${escapeHtml(err.message)}</div>`;
+            } finally {
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-play mr-2"></i>KHỞI CHẠY SPA CRAWLER';
+            }
+        }
+
+        async function runActiveBolaAudit() {
+            const template = (document.getElementById('bola-template')?.value || '').trim();
+            const baseUrl = (document.getElementById('bola-base-url')?.value || '').trim() || (targetInput?.value || '').trim();
+            const method = document.getElementById('bola-method')?.value || 'GET';
+            const userAToken = (document.getElementById('bola-user-a-token')?.value || '').trim();
+            const userBToken = (document.getElementById('bola-user-b-token')?.value || '').trim();
+            const userARes = (document.getElementById('bola-user-a-res')?.value || '').trim();
+            const userBRes = (document.getElementById('bola-user-b-res')?.value || '').trim();
+            const resultsBody = document.getElementById('bola-results-body');
+
+            if (!template || !userAToken || !userBToken) {
+                alert('Vui lòng nhập mẫu endpoint và token của cả User A lẫn User B.');
+                return;
+            }
+
+            if (resultsBody) resultsBody.innerHTML = '<div class="text-rose-400 p-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang thực thi phân tích đối sánh hai token người dùng...</div>';
+
+            try {
+                const res = await fetch('/api/bola/audit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        endpoint_template: template,
+                        base_url: baseUrl,
+                        method: method,
+                        user_a_token: userAToken,
+                        user_b_token: userBToken,
+                        user_a_resource: userARes,
+                        user_b_resource: userBRes
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.results && data.results.length) {
+                    resultsBody.innerHTML = data.results.map(r => `
+                        <div class="p-4 rounded-xl border ${r.is_vulnerable ? 'bg-rose-950/40 border-rose-700/80' : 'bg-emerald-950/40 border-emerald-700/80'} space-y-3 mb-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                                <span class="font-bold text-sm ${r.is_vulnerable ? 'text-rose-300' : 'text-emerald-300'} flex items-center space-x-2">
+                                    <i class="fa-solid ${r.is_vulnerable ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i>
+                                    <span>${r.is_vulnerable ? 'PHÁT HIỆN LỖ HỔNG BOLA / IDOR NGHIÊM TRỌNG' : 'ỦY QUYỀN AN TOÀN (BẢO VỆ TỐT)'}</span>
+                                </span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${r.is_vulnerable ? 'bg-rose-900 text-rose-200' : 'bg-emerald-900 text-emerald-200'}">${escapeHtml(r.severity || 'INFO')}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-300">${escapeHtml(r.details)}</div>
+                            <div class="grid grid-cols-2 gap-2 text-[10px] font-mono bg-slate-950/60 p-2 rounded border border-slate-800">
+                                <div>Status Nạn nhân A: <span class="text-emerald-400 font-bold">${r.status_code_a || '-'}</span></div>
+                                <div>Status Kẻ thử B: <span class="${r.is_vulnerable ? 'text-rose-400 font-bold' : 'text-slate-400'}">${r.status_code_b || '-'}</span></div>
+                            </div>
+                            ${r.curl_reproduction ? `
+                                <div class="space-y-1">
+                                    <div class="text-[10px] text-slate-400">cURL PoC Tái Hiện:</div>
+                                    <div class="flex items-center justify-between bg-black p-2 rounded border border-slate-800 text-[10px]">
+                                        <code class="text-cyan-300 truncate pr-2">${escapeHtml(r.curl_reproduction)}</code>
+                                        <button onclick="copyToClipboard('${escapeJs(r.curl_reproduction)}')" class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded text-[10px] shrink-0 hover:bg-slate-700">Chép</button>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    resultsBody.innerHTML = `<div class="text-rose-400 p-2">Lỗi kiểm thử BOLA: ${escapeHtml(data.error || 'Không có kết quả')}</div>`;
+                }
+            } catch (err) {
+                if (resultsBody) resultsBody.innerHTML = `<div class="text-rose-400 p-2">Lỗi kết nối API: ${escapeHtml(err.message)}</div>`;
+            }
+        }
+
+        async function checkBurpProxyOnline() {
+            const proxyUrl = document.getElementById('burp-proxy-url')?.value || 'http://127.0.0.1:8080';
+            const badge = document.getElementById('burp-proxy-badge');
+            const msg = document.getElementById('burp-proxy-msg');
+
+            if (badge) badge.textContent = 'Đang kiểm tra...';
+            try {
+                const res = await fetch('/api/burp/check-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proxy_url: proxyUrl })
+                });
+                const data = await res.json();
+                if (data.is_online) {
+                    if (badge) {
+                        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800';
+                        badge.textContent = 'TRỰC TUYẾN';
+                    }
+                    if (msg) msg.innerHTML = `<span class="text-emerald-300">✓ Đã kết nối thành công tới Burp Suite Proxy (${escapeHtml(proxyUrl)})!</span>`;
+                } else {
+                    if (badge) {
+                        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-rose-950 text-rose-300 border border-rose-800';
+                        badge.textContent = 'NGOẠI TUYẾN';
+                    }
+                    if (msg) msg.innerHTML = `<span class="text-rose-400">✗ Không thể kết nối tới Burp Suite (${escapeHtml(proxyUrl)}). Đảm bảo Proxy Listener đang bật.</span>`;
+                }
+            } catch (err) {
+                if (badge) badge.textContent = 'LỖI';
+            }
+        }
+
+        async function downloadBurpXmlSitemap() {
+            try {
+                const target = (targetInput?.value || '').trim() || 'https://target.local';
+                const res = await fetch('/api/burp/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ base_url: target, endpoints: currentScanResults?.apis || [] })
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'burp_sitemap.xml';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                } else {
+                    alert('Lỗi xuất tệp Burp XML.');
+                }
+            } catch (err) {
+                alert('Lỗi kết nối xuất Burp XML: ' + err.message);
+            }
+        }
+
+        function saveGlobalAuthHeaders() {
+            const bearer = (document.getElementById('auth-global-bearer')?.value || '').trim();
+            const headers = (document.getElementById('auth-global-headers')?.value || '').trim();
+            localStorage.setItem('x1vart_bearer_token', bearer);
+            localStorage.setItem('x1vart_custom_headers', headers);
+            alert('Đã lưu cấu hình Header xác thực toàn cục vào Storage!');
+        }
+
         // Initialize SSH settings on page load
         setTimeout(loadSshSettings, 500);
+    
     </script>
 
-    <!-- SSH CONFIGURATION MODAL -->
-    <div id="ssh-config-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <!-- MODAL DIALOGS -->
+<div id="ssh-config-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-cyber-card border border-purple-800/80 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden modal-content-animated">
             <div class="px-6 py-4 border-b border-purple-900/60 flex items-center justify-between bg-slate-900/80">
                 <div class="flex items-center space-x-3">
@@ -5069,7 +5730,7 @@ export default AuthService;`;
     </div>
 
     <!-- QUICK USER GUIDE MODAL -->
-    <div id="ssh-guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+<div id="ssh-guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-cyber-card border border-amber-800/80 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden modal-content-animated">
             <div class="px-6 py-4 border-b border-amber-900/60 flex items-center justify-between bg-slate-900/80">
                 <div class="flex items-center space-x-3">
@@ -5126,7 +5787,7 @@ export default AuthService;`;
     </div>
 
     <!-- SCAN HISTORY MODAL -->
-    <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+<div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-cyber-card border border-cyber-border rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden modal-content-animated">
             <!-- Header -->
             <div class="px-6 py-4 border-b border-cyber-border flex items-center justify-between bg-slate-900/60">
@@ -5174,7 +5835,7 @@ export default AuthService;`;
     </div>
 
     <!-- COMMAND PALETTE MODAL (Ctrl + K) -->
-    <div id="command-palette-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-start justify-center pt-20 px-4 transition-all">
+<div id="command-palette-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-start justify-center pt-20 px-4 transition-all">
         <div class="w-full max-w-xl bg-slate-900 border border-cyan-500/50 rounded-2xl shadow-[0_0_35px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col font-mono modal-content-animated">
             <!-- Search Header -->
             <div class="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center space-x-3">
@@ -5193,5 +5854,6 @@ export default AuthService;`;
             </div>
         </div>
     </div>
+
 </body>
 </html>

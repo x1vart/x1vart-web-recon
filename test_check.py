@@ -204,7 +204,35 @@ def main():
     assert user_a.get_auth_headers()["Authorization"] == "Bearer tokA"
     assert ActiveAuthorizationValidator._is_denial_message("Forbidden access") is True
 
+    # 13. Pentest Skills Integration Checks (kali-pentest, recon-subdomain, pentest-network-scanning, exploit-sqli, exploit-xss, pentest-report)
+    assert "dnsx" in KaliSSHBridge.EXTENDED_TOOLS
+    assert "naabu" in KaliSSHBridge.EXTENDED_TOOLS
+    assert "sqlmap" in KaliSSHBridge.EXTENDED_TOOLS
+    assert hasattr(KaliSSHBridge, "run_sqlmap_quick_audit")
+    assert hasattr(KaliSSHBridge, "run_xss_spot_check")
+
+    from core.active_bola_validator import ActiveExploitValidator, ExploitAuditResult
+    exploit_val = ActiveExploitValidator()
+    assert len(exploit_val.SQLI_PAYLOADS) >= 5
+    assert len(exploit_val.XSS_PAYLOADS) >= 4
+    assert exploit_val._check_dbms_error("You have an error in your SQL syntax near '1'") == "MySQL"
+    assert exploit_val._check_dbms_error("invalid input syntax for integer: 'test'") == "PostgreSQL"
+    assert exploit_val._check_dbms_error("unrecognized token: '") == "SQLite"
+
+    # PTES & OWASP API JSON Report Generation Check
+    json_report = ReportGenerator.generate_json_report(dummy_scan)
+    assert "PTES" in json_report["metadata"]["standard"]
+    assert "findings" in json_report
+    assert "findings_summary" in json_report
+
+    # UI Innovation Check: PTES Report Export & Active Exploit Auditor
+    assert "btn-export-ptes-json" in html
+    assert "triggerActiveExploitAudit" in html
+    assert "node[type=\"exploit_sqli\"]" in html
+    assert "node[type=\"exploit_xss\"]" in html
+
     print("[+] All core assertions, 5 UI features, Smart Diagnostics, Scan Profiles, PoC Engine, and 4 Advanced Modules passed successfully.")
+    print("[+] Pentest Skills (kali-pentest, recon-subdomain, pentest-network-scanning, exploit-sqli, exploit-xss, pentest-report, frontend-design) verified!")
 
 if __name__ == "__main__":
     main()

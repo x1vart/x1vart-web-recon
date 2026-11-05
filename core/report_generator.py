@@ -34,6 +34,7 @@ class ReportGenerator:
         cors_audit = _d(scan_data.get("cors_audit") or vuln.get("cors_audit"))
         open_ports = _l(scan_data.get("open_ports") or vuln.get("open_ports"))
         ssl_audit = _d(scan_data.get("ssl_info") or vuln.get("ssl_audit"))
+        active_exploits = _l(scan_data.get("active_exploits") or scan_data.get("exploit_findings") or vuln.get("active_exploits"))
 
         grade = owasp.get("security_grade", "N/A")
         score = owasp.get("exposure_score", 0)
@@ -87,8 +88,8 @@ class ReportGenerator:
     <div class="container">
         <div class="header">
             <div>
-                <div class="brand">x1vart ATTACK SURFACE REPORT</div>
-                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Hệ thống Quản lý Bề mặt Tấn công & Kiểm toán An toàn API (Community Edition)</div>
+                <div class="brand">x1vart ATTACK SURFACE & PENETRATION AUDIT REPORT</div>
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Chuẩn kiểm toán: <b>PTES (Penetration Testing Execution Standard)</b> & <b>OWASP API Security Top 10:2023</b></div>
             </div>
             <div style="text-align: right;">
                 <button class="btn-print" onclick="window.print()">In / Xuất PDF Báo Cáo</button>
@@ -100,8 +101,8 @@ class ReportGenerator:
             <div class="grade-circle">{grade}</div>
             <div class="score-info">
                 <h2>Mục tiêu: <span class="font-mono text-cyan-400">{target}</span></h2>
-                <p>Điểm phơi nhiễm bề mặt: <b style="color: {grade_color}; font-size: 16px;">{score}/100</b> | Mức độ rủi ro: <b style="color: {grade_color};">{risk_level}</b></p>
-                <p style="margin-top: 6px;">Đánh giá dựa trên tiêu chuẩn OWASP API Security Top 10 (2023), Shannon Entropy và Quét Lỗ Hổng Chủ Động.</p>
+                <p>Điểm an toàn / phơi nhiễm bề mặt: <b style="color: {grade_color}; font-size: 16px;">{score}/100</b> | Mức độ rủi ro: <b style="color: {grade_color};">{risk_level}</b></p>
+                <p style="margin-top: 6px;">Phương pháp đánh giá: PTES Active Footprinting, Kali CLI Orchestration, JS AST Reverse-Engineering, OWASP API Threat Modeling và Active Injection Audit.</p>
             </div>
         </div>
 
@@ -335,7 +336,22 @@ class ReportGenerator:
                     </div>
                 """
 
-        # 4. BOLA Candidate API PoC (Burp Suite Proxy & cURL template)
+        # 4. Active Exploit Validation PoC (SQLi / XSS from exploit-sqli & exploit-xss)
+        if active_exploits:
+            for ex in active_exploits[:6]:
+                poc_count += 1
+                vtype = ex.get("vuln_type", "EXPLOIT")
+                border_color = "#ef4444" if "SQL" in vtype else "#f59e0b"
+                html += f"""
+                    <div class="poc-card" style="border-left-color: {border_color};">
+                        <div style="font-weight: 700; color: {border_color}; font-size: 13px;">[PoC #{poc_count}] Active Vulnerability Verified: {vtype} ({ex.get('cwe', 'CWE')})</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Endpoint: <span class="font-mono text-cyan-300">{ex.get('endpoint')}</span> | Parameter: <span class="font-mono text-amber-400">{ex.get('parameter')}</span></div>
+                        <div class="poc-snippet">Bằng chứng: {ex.get('evidence', '')}</div>
+                        <div class="poc-cmd">curl -i -k "{ex.get('endpoint')}?{ex.get('parameter')}={ex.get('payload')}"</div>
+                    </div>
+                """
+
+        # 5. BOLA Candidate API PoC (Burp Suite Proxy & cURL template)
         bola_eps = [ep for ep in endpoints if ep.get('is_bola_candidate')]
         if bola_eps:
             for ep in bola_eps[:4]:
@@ -372,3 +388,64 @@ class ReportGenerator:
 </html>
 """
         return html
+
+    @staticmethod
+    def generate_json_report(scan_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Produces standardized machine-readable JSON security report
+        conforming to PTES & SysReptor/DefectDojo finding schema.
+        """
+        def _l(v): return v if isinstance(v, list) else []
+        def _d(v): return v if isinstance(v, dict) else {}
+
+        target = scan_data.get("target") or scan_data.get("domain") or "Target"
+        owasp = _d(scan_data.get("owasp_analysis"))
+        findings_raw = _l(owasp.get("findings"))
+        active_exploits = _l(scan_data.get("active_exploits") or scan_data.get("exploit_findings"))
+
+        findings = []
+        for idx, f in enumerate(findings_raw, 1):
+            findings.append({
+                "id": f"FINDING-{idx:03d}",
+                "title": f.get("title", ""),
+                "severity": f.get("severity", "MEDIUM"),
+                "cvss_score": 9.0 if f.get("severity") == "CRITICAL" else (7.5 if f.get("severity") == "HIGH" else 5.0),
+                "owasp_category": f.get("owasp_id", ""),
+                "description": f.get("description", ""),
+                "remediation": f.get("remediation", ""),
+                "status": "OPEN"
+            })
+
+        for ex in active_exploits:
+            findings.append({
+                "id": f"EXPLOIT-{len(findings) + 1:03d}",
+                "title": f"Verified {ex.get('vuln_type')} on {ex.get('parameter')}",
+                "severity": ex.get("severity", "HIGH"),
+                "cvss_score": 9.5 if ex.get("severity") == "CRITICAL" else 8.0,
+                "cwe": ex.get("cwe", ""),
+                "owasp_category": ex.get("owasp_category", ""),
+                "endpoint": ex.get("endpoint", ""),
+                "evidence": ex.get("evidence", ""),
+                "remediation": ex.get("remediation", ""),
+                "status": "VERIFIED"
+            })
+
+        return {
+            "metadata": {
+                "generator": "x1vart Enterprise Pentest Suite",
+                "standard": "PTES & OWASP API Security Top 10:2023",
+                "timestamp": datetime.now().isoformat(),
+                "target": target,
+                "exposure_score": owasp.get("exposure_score", 0),
+                "security_grade": owasp.get("security_grade", "N/A"),
+                "risk_level": owasp.get("risk_level", "UNKNOWN")
+            },
+            "findings_summary": {
+                "total": len(findings),
+                "critical": len([f for f in findings if f["severity"] == "CRITICAL"]),
+                "high": len([f for f in findings if f["severity"] == "HIGH"]),
+                "medium": len([f for f in findings if f["severity"] == "MEDIUM"]),
+                "low": len([f for f in findings if f["severity"] == "LOW"])
+            },
+            "findings": findings
+        }

@@ -15,8 +15,9 @@ logger = logging.getLogger("x1vart.ssh_bridge")
 
 
 class KaliSSHBridge:
-    ONE_LINER_COMMAND = "sudo apt update && sudo apt install -y nmap whatweb nikto ffuf whois subfinder sslscan wafw00f && sudo systemctl enable --now ssh"
+    ONE_LINER_COMMAND = "sudo apt update && sudo apt install -y nmap whatweb nikto ffuf whois subfinder sslscan wafw00f sqlmap && sudo systemctl enable --now ssh"
     REQUIRED_TOOLS = ["nmap", "whatweb", "nikto", "ffuf", "whois", "subfinder", "sslscan", "wafw00f"]
+    EXTENDED_TOOLS = ["dnsx", "naabu", "sqlmap", "dalfox"]
 
     def __init__(
         self,
@@ -148,7 +149,8 @@ class KaliSSHBridge:
         # Step 3: Audit Installed Pentest Tools
         try:
             with client:
-                which_cmd = "uname -a && which " + " ".join(self.REQUIRED_TOOLS)
+                all_tools = self.REQUIRED_TOOLS + self.EXTENDED_TOOLS
+                which_cmd = "uname -a && which " + " ".join(all_tools)
                 stdin, stdout, stderr = client.exec_command(which_cmd, timeout=6.0)
                 output = stdout.read().decode("utf-8", errors="ignore").strip()
                 lines = output.splitlines()
@@ -156,6 +158,7 @@ class KaliSSHBridge:
                 found_paths = [line.strip() for line in lines[1:] if line.strip() and not line.strip().startswith("which:")]
                 installed = set(p.split("/")[-1] for p in found_paths)
                 missing = [t for t in self.REQUIRED_TOOLS if t not in installed]
+                ext_installed = [t for t in self.EXTENDED_TOOLS if t in installed]
 
                 if missing:
                     return {
@@ -167,6 +170,7 @@ class KaliSSHBridge:
                         "uname": uname,
                         "installed_tools": list(installed),
                         "missing_tools": missing,
+                        "extended_tools": ext_installed,
                         "message": f"⚠️ Kết nối thành công nhưng thiếu tool: {', '.join(missing)}",
                         "guidance": f"Chạy lệnh sau trên terminal Kali để cài đủ:\n{self.ONE_LINER_COMMAND}",
                         "one_liner": self.ONE_LINER_COMMAND
@@ -180,6 +184,7 @@ class KaliSSHBridge:
                     "uname": uname,
                     "installed_tools": list(installed),
                     "missing_tools": [],
+                    "extended_tools": ext_installed,
                     "message": "✅ Kết nối SSH tới Kali Linux thành công! Đầy đủ công cụ bảo mật.",
                     "guidance": "Môi trường Kali đã sẵn sàng cho cả chế độ Fast Recon và Deep Pentest.",
                     "one_liner": self.ONE_LINER_COMMAND
@@ -341,11 +346,18 @@ class KaliSSHBridge:
             logger.error(f"run_stage1_passive rejected unsafe domain '{domain}': {e}")
             return res
 
-        # Subfinder CLI
-        sf_cmd = f"subfinder -d {safe_domain} -silent -timeout 10"
+        # Subfinder + dnsx resolution pipeline
+        has_dnsx = "dnsx" in self.run_command("which dnsx", timeout=3.0).get("stdout", "")
+        if has_dnsx:
+            sf_cmd = f"subfinder -d {safe_domain} -silent -timeout 10 | dnsx -silent -resp -a -cname"
+            stage_name = "Stage 1: OSINT & Subfinder + dnsx DNS Recon (Kali SSH)"
+        else:
+            sf_cmd = f"subfinder -d {safe_domain} -silent -timeout 10"
+            stage_name = "Stage 1: OSINT & Subfinder (Kali SSH)"
+
         sf_out = self.run_command(sf_cmd, timeout=25.0)
         res["cli_command_logs"].append({
-            "stage": "Stage 1: OSINT & Subfinder (Kali SSH)",
+            "stage": stage_name,
             "command": sf_cmd,
             "stdout": sf_out["stdout"][:2000],
             "stderr": sf_out["stderr"][:500],
@@ -364,12 +376,60 @@ class KaliSSHBridge:
                 "execution_time_sec": 1.0
             })
 
-        found_subs = [s.strip() for s in sf_out["stdout"].splitlines() if s.strip()]
-        unique_subs = list(dict.fromkeys([domain] + found_subs))
-        res["subdomain_recon"]["subdomains"] = [
-            {"subdomain": sub, "cname": "", "ips": [], "takeover_risk": False, "takeover_service": None}
-            for sub in unique_subs
-        ]
+        takeover_signatures = {
+            "github.io": "GitHub Pages",
+            "herokuapp.com": "Heroku",
+            "azurewebsites.net": "Microsoft Azure",
+            "s3.amazonaws.com": "AWS S3 Bucket",
+            "pantheonsite.io": "Pantheon",
+            "zendesk.com": "Zendesk",
+            "bitbucket.io": "Bitbucket",
+            "readme.io": "ReadMe"
+        }
+        sub_dict: Dict[str, Dict[str, Any]] = {}
+        for raw_line in sf_out["stdout"].splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            if "[" in line and "]" in line:
+                brackets = re.findall(r"\[([^\]]+)\]", line)
+                host_match = re.match(r"^(\S+)", line)
+                host = host_match.group(1) if host_match else line.split()[0]
+                cname = ""
+                ips: List[str] = []
+                for b in brackets:
+                    if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", b):
+                        ips.append(b)
+                    else:
+                        cname = b
+                is_takeover = any(sig in cname.lower() for sig in takeover_signatures)
+                takeover_svc = next((svc for sig, svc in takeover_signatures.items() if sig in cname.lower()), None)
+                sub_dict[host] = {
+                    "subdomain": host,
+                    "cname": cname,
+                    "ips": ips,
+                    "takeover_risk": is_takeover,
+                    "takeover_service": takeover_svc
+                }
+            else:
+                host = line.split()[0]
+                if host not in sub_dict:
+                    sub_dict[host] = {
+                        "subdomain": host,
+                        "cname": "",
+                        "ips": [],
+                        "takeover_risk": False,
+                        "takeover_service": None
+                    }
+        if domain not in sub_dict:
+            sub_dict[domain] = {
+                "subdomain": domain,
+                "cname": "",
+                "ips": [],
+                "takeover_risk": False,
+                "takeover_service": None
+            }
+        res["subdomain_recon"]["subdomains"] = list(sub_dict.values())
         return res
 
     def run_stage3_active(self, domain: str, target_url: str, profile: str = "fast") -> Dict[str, Any]:
@@ -417,18 +477,45 @@ class KaliSSHBridge:
         base_url = f"{base_proto}://{safe_domain}"
 
         # -------------------------------------------------------------
-        # 1. Nmap Port & Service Scan (Fast vs Deep with NSE Scripts)
+        # 1. Naabu + Nmap Port & Service Scan (PTES Active Footprinting)
         # -------------------------------------------------------------
-        if is_deep:
-            nmap_cmd = f"nmap -sV --version-all --script=http-title,ssl-enum-ciphers,http-methods -T4 --host-timeout 75s {safe_domain}"
-            nmap_timeout = 80.0
-            nmap_stage_label = "Stage 3: Deep Nmap Port & NSE Audit (Kali SSH)"
-        else:
-            nmap_cmd = f"nmap -F -sV --version-light -T4 --host-timeout 25s {safe_domain}"
-            nmap_timeout = 30.0
-            nmap_stage_label = "Stage 3: Fast Nmap Port Scan (Kali SSH)"
+        has_naabu = "naabu" in self.run_command("which naabu", timeout=3.0).get("stdout", "")
+        naabu_ports: List[str] = []
+        if has_naabu:
+            naabu_cmd = f"naabu -host {safe_domain} -tp {'1000' if is_deep else '100'} -silent"
+            naabu_out = self.run_command(naabu_cmd, timeout=20.0)
+            cli_logs.append({
+                "stage": "Stage 3: Naabu Fast Port Discovery (Kali SSH)",
+                "command": naabu_cmd,
+                "stdout": naabu_out["stdout"][:1500],
+                "stderr": naabu_out["stderr"][:300],
+                "execution_time_sec": 2.0
+            })
+            for lp in naabu_out["stdout"].splitlines():
+                pm = re.search(r":(\d+)$", lp.strip())
+                if pm:
+                    naabu_ports.append(pm.group(1))
 
-        t_start = time.time() if "time" in globals() else 0
+        if naabu_ports:
+            port_arg = f"-p {','.join(sorted(set(naabu_ports))[:50])}"
+            if is_deep:
+                nmap_cmd = f"nmap -sV --script=http-title,ssl-enum-ciphers,http-methods {port_arg} -T4 --host-timeout 60s {safe_domain}"
+                nmap_timeout = 65.0
+                nmap_stage_label = "Stage 3: Targeted Nmap Service Fingerprint & NSE (Kali SSH)"
+            else:
+                nmap_cmd = f"nmap -sV --version-light {port_arg} -T4 --host-timeout 25s {safe_domain}"
+                nmap_timeout = 30.0
+                nmap_stage_label = "Stage 3: Targeted Nmap Service Fingerprint (Kali SSH)"
+        else:
+            if is_deep:
+                nmap_cmd = f"nmap -sV --version-all --script=http-title,ssl-enum-ciphers,http-methods -T4 --host-timeout 75s {safe_domain}"
+                nmap_timeout = 80.0
+                nmap_stage_label = "Stage 3: Deep Nmap Port & NSE Audit (Kali SSH)"
+            else:
+                nmap_cmd = f"nmap -F -sV --version-light -T4 --host-timeout 25s {safe_domain}"
+                nmap_timeout = 30.0
+                nmap_stage_label = "Stage 3: Fast Nmap Port Scan (Kali SSH)"
+
         nmap_out = self.run_command(nmap_cmd, timeout=nmap_timeout)
         cli_logs.append({
             "stage": nmap_stage_label,
@@ -606,6 +693,19 @@ class KaliSSHBridge:
             if "+ OSVDB-" in line or "+ Server:" in line or "+ Retrieved" in line or "+ The anti-clickjacking" in line or "+ Uncommon header" in line:
                 nikto_list.append(line.strip())
 
+        # Check for pfSense indicator across banners & headers
+        combined_logs = " ".join([l.get("stdout", "") for l in cli_logs])
+        if re.search(r"\b(pfsense|netgate)\b", combined_logs, re.IGNORECASE):
+            waf_data["detected"] = True
+            waf_data["pfsense_detected"] = True
+            waf_data["waf_name"] = "pfSense / Netgate Firewall"
+            waf_data["summary"] = "Phát hiện hệ điều hành/firewall pfSense (Netgate). Khuyến nghị audit giao diện Web GUI & cấu hình VPN."
+            tech_list.append({
+                "name": "pfSense Firewall",
+                "category": "Firewall / Gateway",
+                "version": "Netgate pfSense"
+            })
+
         return {
             "status": "SUCCESS",
             "profile": profile,
@@ -624,3 +724,55 @@ class KaliSSHBridge:
                 "platform": f"Kali Linux ({'Deep Pentest' if is_deep else 'Fast Recon'})"
             }
         }
+
+    def run_sqlmap_quick_audit(self, target_url: str, param: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Executes non-destructive SQLi spot audit using sqlmap on Kali (batch mode, level 1, risk 1).
+        """
+        safe_url = shlex.quote(target_url)
+        param_flag = f"-p {shlex.quote(param)}" if param else ""
+        cmd = f"sqlmap -u {safe_url} {param_flag} --batch --smart --level=1 --risk=1 --timeout=15 --retries=1 --threads=2 --dbs"
+        res = self.run_command(cmd, timeout=30.0)
+        stdout = res.get("stdout", "")
+        is_vuln = "is vulnerable" in stdout or "sqlmap identified the following injection points" in stdout
+        dbs = re.findall(r"\[\*\]\s+([a-zA-Z0-9_]+)", stdout)
+        return {
+            "target_url": target_url,
+            "parameter": param,
+            "vulnerable": is_vuln,
+            "databases": dbs,
+            "output_snippet": stdout[:1500],
+            "command": cmd
+        }
+
+    def run_xss_spot_check(self, target_url: str) -> Dict[str, Any]:
+        """
+        Executes XSS spot-check on Kali via dalfox or fallback reflection probe.
+        """
+        has_dalfox = "dalfox" in self.run_command("which dalfox", timeout=3.0).get("stdout", "")
+        safe_url = shlex.quote(target_url)
+        if has_dalfox:
+            cmd = f"dalfox url {safe_url} --silence --skip-bav --waf-evasion"
+            res = self.run_command(cmd, timeout=25.0)
+            stdout = res.get("stdout", "")
+            is_vuln = "[POC]" in stdout or "[V]" in stdout
+            return {
+                "engine": "dalfox",
+                "target_url": target_url,
+                "vulnerable": is_vuln,
+                "output_snippet": stdout[:1500],
+                "command": cmd
+            }
+        else:
+            token = "x1vxss_test"
+            cmd = f"curl -sk -L \"{target_url}?q=%22%3E%3C{token}%3E\" | grep -F \"<{token}>\""
+            res = self.run_command(cmd, timeout=10.0)
+            stdout = res.get("stdout", "")
+            is_reflected = f"<{token}>" in stdout
+            return {
+                "engine": "reflection_probe",
+                "target_url": target_url,
+                "vulnerable": is_reflected,
+                "output_snippet": stdout[:500],
+                "command": cmd
+            }
