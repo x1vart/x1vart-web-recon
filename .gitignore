@@ -36,3 +36,4 @@ reports/*.pdf
 .DS_Store
 Thumbs.db
 scratch/
+.agents/

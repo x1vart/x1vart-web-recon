@@ -32,6 +32,7 @@
 
 Engineered with modern cybersecurity standards, it delivers an integrated experience for Red Teams, Blue Teams, and DevSecOps practitioners:
 - 🚀 **Native Desktop App Window**: Launches seamlessly as a standalone, distraction-free desktop application (Chromium Native App mode), zero lag, and zero address bar clutter.
+- 🎨 **Tier-1 SecOps Console Redesign**: Inspired by Cloudflare Radar and Datadog Security. Features a deep dark slate/zinc palette (`#030712`), Bento-Grid risk scorecards, hairline borders (`border-zinc-800/60`), and responsive mobile drawer navigation.
 - 🔗 **Agentless SSH Bridge**: Controls remote Kali Linux environments directly over standard SSH (Port 22). No agents, custom daemons, or background workers needed on the Kali instance.
 - 🛡️ **OWASP API Top 10:2023 Threat Modeler**: Automated risk exposure analysis, dynamic Risk Scoring, and multi-dimensional 10-axis Cyber Threat Radar visualization.
 - 💎 **Deep JS AST & Shannon Entropy Secrets**: Parses Webpack and Vite client bundles, isolates hidden endpoints, identifies BOLA/IDOR parameters, and recovers high-entropy secrets ($H(X) \ge 3.0$).
@@ -224,6 +225,11 @@ sudo apt update && sudo apt install -y nmap whatweb nikto ffuf whois subfinder s
 | `GET` | `/api/openapi/download` | Exports auto-generated OpenAPI 3.0 JSON specification |
 | `GET` | `/api/subdomains/export.txt` | Exports discovered subdomains as plain text wordlist |
 | `POST` | `/api/ssh/test` | Verifies remote Kali Linux SSH reachability and tool availability |
+| `POST` | `/api/scope/validate` | Validates domain against scope whitelist and 3rd-party SaaS filters |
+| `POST` | `/api/burp/check-proxy` | Verifies reachability of upstream Burp Suite HTTP proxy |
+| `POST` | `/api/burp/export` | Generates and exports Burp Suite XML traffic sitemap |
+| `POST` | `/api/bola/test` | Executes dual-token BOLA/IDOR authorization validation on API endpoints |
+| `POST` | `/api/spa/crawl` | Triggers dynamic headless Chromium crawling for Single Page Applications |
 | `POST` | `/api/easm/schedules` | Registers continuous attack surface monitoring schedules |
 | `POST` | `/api/easm/test-webhook`| Sends test security alert notification to configured Discord Webhook |
 
